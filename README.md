@@ -16,7 +16,7 @@ Then, deploy the server; see [deployment](./deployment/README.md). It'll be runn
 ## Usage
 
 **Python client**
-`
+
 Install the `imaging-server-kit` package with `pip`:
 
 ```
