@@ -30,19 +30,21 @@ from imaging_server_kit import ServerKitAPIClient
 
 server_url = "http://localhost:7000"
 
-client = ServerKitAPIClient(server_url)
-client.connect()
+client = ServerKitAPIClient()
+client.connect(server_url)
 
 print(client.algorithms)
 
 import skimage.data
 image = skimage.data.astronaut()
 
-segmentation = client.run_segmentation(
-    image,
+data_tuple = client.run_algorithm(
     algorithm="rembg",
+    image=image,
     rembg_model_name="silueta",
 )
+for (data, data_params, data_type) in data_tuple:
+    print(f"Algo returned: {data_type=} ({data.shape=})")
 ```
 
 More [examples](./examples/).
