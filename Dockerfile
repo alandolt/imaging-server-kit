@@ -1,6 +1,6 @@
 FROM condaforge/miniforge3:latest
 
-RUN mamba install python=3.9 -y
+RUN conda install python=3.9 -y
 
 COPY . .
 

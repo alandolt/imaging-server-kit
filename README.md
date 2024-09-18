@@ -3,30 +3,34 @@
 
 Run algorithms on images via a FastAPI server.
 
-## Installation
+## Setup
+
+First, install the `imaging-server-kit` image with `docker`:
 
 ```
-pip install -e .
+docker build -t imaging-server-kit .
 ```
+
+Then, deploy the server; see [deployment](./deployment/README.md). It'll be running on `http://localhost:7000`.
 
 ## Usage
 
-**Server**
+**Python client**
+`
+Install the `imaging-server-kit` package with `pip`:
 
-The server is [...].
-
-```python
-from imaging_server_kit import AlgorithmServer
+```
+pip install git+https://gitlab.com/epfl-center-for-imaging/imaging-server-kit.git
 ```
 
-**Client**
-
-The client is [...].
+Connect to the server and run algorithms from Python:
 
 ```python
 from imaging_server_kit import ServerKitAPIClient
 
-client = ServerKitAPIClient("http://localhost:7000")
+server_url = "http://localhost:7000"
+
+client = ServerKitAPIClient(server_url)
 client.connect()
 
 print(client.algorithms)
@@ -40,6 +44,24 @@ segmentation = client.run_segmentation(
     rembg_model_name="silueta",
 )
 ```
+
+More [examples](./examples/).
+
+**Napari client**
+
+Coming soon.
+
+**Web client**
+
+Coming soon.
+
+**QuPath client**
+
+Coming soon.
+
+**Fiji plugin**
+
+Coming soon.
 
 ## Contributing
 
