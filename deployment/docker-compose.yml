@@ -1,0 +1,77 @@
+version: "3"
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "7000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - servers_registry
+      - rembg
+      - stardist
+      - spam
+      - mousetumornet
+      - tau-fibrils-yolo
+      - orientationpy
+      - ilastik
+
+  servers_registry:
+    build:
+      context: ./servers_registry
+
+  rembg:
+    build:
+      context: ./servers/serverkit-rembg
+    depends_on:
+      - servers_registry
+
+  stardist:
+    build:
+      context: ./servers/serverkit-stardist
+    depends_on:
+      - servers_registry
+
+  mousetumornet:
+    build:
+      context: ./servers/serverkit-mousetumornet
+    depends_on:
+      - servers_registry
+    ipc: host
+
+  spam:
+    build:
+      context: ./servers/serverkit-spam
+    depends_on:
+      - servers_registry
+
+  tau-fibrils-yolo:
+    build:
+      context: ./servers/serverkit-tau-fibrils-yolo
+    depends_on:
+      - servers_registry
+
+  orientationpy:
+    build:
+      context: ./servers/serverkit-orientationpy
+    depends_on:
+      - servers_registry
+
+  skimage:
+    build:
+      context: ./servers/serverkit-skimage
+    depends_on:
+      - servers_registry
+
+  trackpy:
+    build:
+      context: ./servers/serverkit-trackpy
+    depends_on:
+      - servers_registry
+
+  ilastik:
+    build:
+      context: ./servers/serverkit-ilastik
+    depends_on:
+      - servers_registry
