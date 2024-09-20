@@ -1,4 +1,4 @@
-from typing import List, Literal, Tuple
+from typing import List, Literal, Tuple, Type, Union
 from pathlib import Path
 import numpy as np
 from pydantic import BaseModel, Field, validator
@@ -41,8 +41,13 @@ class Parameters(BaseModel):
 
 # Define the run_algorithm() method for your algorithm
 class Server(serverkit.AlgorithmServer):
-    def __init__(self):
-        super().__init__("{{ cookiecutter.package }}", Parameters)
+    def __init__(
+        self,
+        algorithm_name: str="{{ cookiecutter.package }}",
+        parameters_model: Type[BaseModel]=Parameters,
+        service_url: Union[str, None]=None
+    ):
+        super().__init__(algorithm_name, parameters_model, service_url)
 
     def run_algorithm(
         self,
@@ -57,7 +62,7 @@ class Server(serverkit.AlgorithmServer):
         segmentation_params = {}
 
         return [(segmentation, segmentation_params, 'labels')]
-    
+
     def load_sample_images(self) -> List["np.ndarray"]:
         """Load one or multiple sample images."""
         image_dir = Path(__file__).parent / "sample_images"

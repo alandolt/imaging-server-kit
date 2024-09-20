@@ -1,5 +1,5 @@
 ![EPFL Center for Imaging logo](https://imaging.epfl.ch/resources/logo-for-gitlab.svg)
-# 🪐 Imaging Server Kit
+# 🪐 Deployment
 
 Start the server:
 
@@ -7,10 +7,32 @@ Start the server:
 docker compose up -d
 ```
 
-Add a new algorithm:
+**Add a new algorithm**
+
+Start from the template:
 
 ```
 cookiecutter cookiecutter_template/
+```
+
+Edit the `Parameters` and `Server` in your `main.py` to your liking.
+
+Move your `serverkit-my-algo` folder to `./servers`.
+
+Add an entry to `docker-compose.yml`:
+
+```
+my-algo:
+  build:
+    context: ./servers/serverkit-my-algo
+  depends_on:
+    - servers_registry
+```
+
+Restart the server:
+
+```
+docker compose restart
 ```
 
 ## Contributing

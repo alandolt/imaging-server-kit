@@ -1,23 +1,31 @@
 import os
 import requests
-from typing import Type, List, Tuple
+from typing import Type, List, Tuple, Union
 from pydantic import BaseModel, ConfigDict
 from fastapi import FastAPI
 import imaging_server_kit as serverkit
 
-REGISTRY_URL = os.getenv("REGISTRY_URL", "http://servers_registry:5000/")
-
+REGISTRY_URL = os.getenv("REGISTRY_URL", "http://servers_registry:8000")
 
 class Parameters(BaseModel):
     ...
 
     model_config = ConfigDict(extra="forbid")
 
-
 class AlgorithmServer:
-    def __init__(self, algorithm_name: str, parameters_model: Type[BaseModel]):
+    def __init__(
+        self,
+        algorithm_name: str,
+        parameters_model: Type[BaseModel],
+        service_url: Union[str, None]=None
+    ):
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
+
+        if service_url is None:
+            self.service_url = f"http://{algorithm_name}:8000"
+        else:
+            self.service_url = service_url
 
         self.app = FastAPI(title=algorithm_name)
 
@@ -28,13 +36,17 @@ class AlgorithmServer:
 
     def register_with_registry(self):
         try:
-            response = requests.get(REGISTRY_URL)
+            response = requests.get(f"{REGISTRY_URL}/")
         except Exception:
             print("Registry unavailable.")
             return
 
         response = requests.post(
-            f"{REGISTRY_URL}/register", json={"name": self.algorithm_name}
+            f"{REGISTRY_URL}/register",
+            json={
+                "name": self.algorithm_name,
+                "url": self.service_url
+            }
         )
         if response.status_code == 201:
             print(f"Service {self.algorithm_name} registered successfully.")
@@ -57,7 +69,7 @@ class AlgorithmServer:
             serialized_results = serverkit.serialize_result_tuple(result_data_tuple)
             return serialized_results
 
-        @self.app.get("/algorithm_parameters", response_model=dict)
+        @self.app.get("/parameters", response_model=dict)
         def get_algo_params():
             return self.parameters_model.model_json_schema()
 
