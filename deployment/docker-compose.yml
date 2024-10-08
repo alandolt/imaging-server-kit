@@ -55,3 +55,49 @@ services:
       context: ./servers/serverkit-trackpy
     depends_on:
       - servers_registry
+
+  cellpose:
+    build:
+      context: ./servers/serverkit-cellpose
+    depends_on:
+      - servers_registry
+  
+  instanseg:
+    build:
+      context: ./servers/serverkit-instanseg
+    depends_on:
+      - servers_registry
+  
+  spotiflow:
+    build:
+      context: ./servers/serverkit-spotiflow
+    depends_on:
+      - servers_registry
+  
+  sam2-auto:
+    build:
+      context: ./servers/serverkit-sam2
+      dockerfile: Dockerfile.auto
+    depends_on:
+      - servers_registry
+  
+  sam2-points:
+    build:
+      context: ./servers/serverkit-sam2
+      dockerfile: Dockerfile.points
+    depends_on:
+      - servers_registry
+  
+  sam2-boxes:
+    build:
+      context: ./servers/serverkit-sam2
+      dockerfile: Dockerfile.boxes
+    depends_on:
+      - servers_registry
+  
+  sam2-video:
+    build:
+      context: ./servers/serverkit-sam2
+      dockerfile: Dockerfile.video
+    depends_on:
+      - servers_registry

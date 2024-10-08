@@ -1,6 +1,7 @@
 FROM condaforge/miniforge3:latest
 
 RUN conda install python=3.9 -y
+# RUN conda install python=3.10 -y
 
 COPY . .
 

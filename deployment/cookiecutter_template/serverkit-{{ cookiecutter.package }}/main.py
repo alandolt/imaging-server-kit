@@ -19,7 +19,7 @@ class Parameters(BaseModel):
     )
     model_name: Literal['model1', 'model2'] = Field(
         ...,
-        title="Model to use.",
+        title="Model",
         description="Model description.",
         json_schema_extra={"widget_type": "dropdown"},
     )
@@ -44,10 +44,9 @@ class Server(serverkit.AlgorithmServer):
     def __init__(
         self,
         algorithm_name: str="{{ cookiecutter.package }}",
-        parameters_model: Type[BaseModel]=Parameters,
-        service_url: Union[str, None]=None
+        parameters_model: Type[BaseModel]=Parameters
     ):
-        super().__init__(algorithm_name, parameters_model, service_url)
+        super().__init__(algorithm_name, parameters_model)
 
     def run_algorithm(
         self,
