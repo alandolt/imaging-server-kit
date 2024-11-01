@@ -1,4 +1,5 @@
-from imaging_server_kit.client import ServerKitAPIClient
+from imaging_server_kit.registry_client import RegistryClient
+from imaging_server_kit.client import Client
 from imaging_server_kit.server import AlgorithmServer
 from imaging_server_kit.registry import RegistryServer
 from imaging_server_kit.encoding import encode_contents, decode_contents

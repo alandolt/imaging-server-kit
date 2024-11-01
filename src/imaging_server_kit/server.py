@@ -19,7 +19,6 @@ class AlgorithmServer:
     def __init__(self, algorithm_name: str, parameters_model: Type[BaseModel]):
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
-        self.service_url = f"http://{algorithm_name}:8000"
 
         self.app = FastAPI(title=algorithm_name)
 
@@ -28,7 +27,18 @@ class AlgorithmServer:
 
         self.register_routes()
 
+        self.services = []
+
+    def auto_register(self):
+        self.services = [self.algorithm_name]
+
+    def auto_deregister(self):
+        self.services = []
+
     def register_with_registry(self):
+        
+        self.auto_register()
+
         try:
             response = requests.get(f"{REGISTRY_URL}/")
         except Exception:
@@ -37,7 +47,10 @@ class AlgorithmServer:
 
         response = requests.post(
             f"{REGISTRY_URL}/register",
-            json={"name": self.algorithm_name, "url": self.service_url},
+            json={
+                "name": self.algorithm_name, 
+                "url": f"http://{self.algorithm_name}:8000",
+            },
         )
         if response.status_code == 201:
             print(f"Service {self.algorithm_name} registered successfully.")
@@ -45,6 +58,9 @@ class AlgorithmServer:
             print(f"Failed to register {self.algorithm_name}: {response.json()}")
 
     def deregister_from_registry(self):
+
+        self.auto_deregister()
+
         deregister_url = f"{REGISTRY_URL}/deregister"
         response = requests.post(deregister_url, json={"name": self.algorithm_name})
         if response.status_code == 201:
@@ -54,8 +70,12 @@ class AlgorithmServer:
 
     def register_routes(self):
         @self.app.get("/")
-        def read_status():
-            return {"Status": "running"}
+        def home():
+            return list_services()
+        
+        @self.app.get("/services")
+        def list_services():
+            return {"services": self.services}
 
         # I noted that the 422 error doesn't get raised when parameters are invalid. Weird?
         @self.app.post("/", status_code=status.HTTP_201_CREATED)
