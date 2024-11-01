@@ -1,16 +1,3 @@
----
-title: Imaging Server Kit
-emoji: 🦀
-colorFrom: yellow
-colorTo: pink
-sdk: docker
-pinned: false
-license: mit
-short_description: Base image for the Imaging Server Kit project.
----
-
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
-
 ![EPFL Center for Imaging logo](https://imaging.epfl.ch/resources/logo-for-gitlab.svg)
 # 🪐 Imaging Server Kit
 
