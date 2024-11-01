@@ -49,9 +49,6 @@ class Server:
             print(f"Failed to register {self.algorithm_name}: {response.json()}")
 
     def deregister_from_registry(self):
-
-        # self.auto_deregister()
-
         deregister_url = f"{REGISTRY_URL}/deregister"
         response = requests.post(deregister_url, json={"name": self.algorithm_name})
         if response.status_code == 201:

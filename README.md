@@ -18,11 +18,7 @@ docker build -t imaging-server-kit:3.10 --file Dockerfile-3.10 .
 docker build -t imaging-server-kit:gpu --file Dockerfile-GPU .
 ```
 
-**Run an algorithm registry server (with multiple algorithms to choose from)**
-
-See [deployment](./deployment/README.md). The server will be running on `http://localhost:7000`.
-
-**Run a single algorithm server**
+**Run an algorithm server**
 
 The server will be running on `http://localhost:8000`.
 
@@ -30,6 +26,10 @@ The server will be running on `http://localhost:8000`.
 docker build -t serverkit/rembg .
 docker run -it --rm -p 8000:8000 serverkit/rembg
 ```
+
+**Run an algorithm server with multiple algorithms**
+
+See [deployment](./reference_deployment/README.md). The server will be running on `http://localhost:7000`.
 
 ## Usage
 
@@ -41,47 +41,23 @@ Install the `imaging-server-kit` package with `pip`:
 pip install git+https://gitlab.com/epfl-center-for-imaging/imaging-server-kit.git
 ```
 
-Connect to a server **registry** and run algorithms from Python:
-
-```python
-from imaging_server_kit import RegistryClient
-
-client = RegistryClient()
-
-client.connect("http://localhost:7000")
-
-print(client.algorithms)
-# [`rembg`, `stardist`, `sam2`]
-
-<<<<<<< HEAD
-import skimage.data
-image = skimage.data.astronaut()
-
-data_tuple = client.run_algorithm(
-=======
-algo_output = client.run_algorithm(
->>>>>>> 5fdd1ad (Progress)
-    algorithm="rembg",
-    image=(...),
-    rembg_model_name="silueta",
-)
-```
-
-Connect to an algorithm **server** and run the algorithm:
+Connect to an algorithm server and run algorithms from Python:
 
 ```python
 from imaging_server_kit import Client
 
 client = Client()
 
-client.connect("http://localhost:8000")
+client.connect("http://localhost:7000")
 
-algo_output = client.run_algorithm(
+print(client.algorithms)
+# [`rembg`, `stardist`, `sam2`]
+
+data_tuple = client.run_algorithm(
+    algorithm="rembg",
     image=(...),
     rembg_model_name="silueta",
 )
-for (data, data_params, data_type) in data_tuple:
-    print(f"Algo returned: {data_type=} ({data.shape=})")
 ```
 
 More [examples](./examples/).
