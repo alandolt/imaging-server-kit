@@ -1,7 +1,7 @@
 ![EPFL Center for Imaging logo](https://imaging.epfl.ch/resources/logo-for-gitlab.svg)
 # 🪐 Imaging Server Kit
 
-Run algorithms on images using a FastAPI server.
+Run seamlessly interoperable algorithms on images using FastAPI.
 
 ## Setup
 

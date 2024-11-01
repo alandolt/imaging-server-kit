@@ -15,7 +15,7 @@ class Parameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class AlgorithmServer:
+class Server:
     def __init__(self, algorithm_name: str, parameters_model: Type[BaseModel]):
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
@@ -27,18 +27,9 @@ class AlgorithmServer:
 
         self.register_routes()
 
-        self.services = []
-
-    def auto_register(self):
         self.services = [self.algorithm_name]
 
-    def auto_deregister(self):
-        self.services = []
-
     def register_with_registry(self):
-        
-        self.auto_register()
-
         try:
             response = requests.get(f"{REGISTRY_URL}/")
         except Exception:
@@ -48,7 +39,7 @@ class AlgorithmServer:
         response = requests.post(
             f"{REGISTRY_URL}/register",
             json={
-                "name": self.algorithm_name, 
+                "name": self.algorithm_name,
                 "url": f"http://{self.algorithm_name}:8000",
             },
         )
@@ -59,7 +50,7 @@ class AlgorithmServer:
 
     def deregister_from_registry(self):
 
-        self.auto_deregister()
+        # self.auto_deregister()
 
         deregister_url = f"{REGISTRY_URL}/deregister"
         response = requests.post(deregister_url, json={"name": self.algorithm_name})
@@ -72,23 +63,29 @@ class AlgorithmServer:
         @self.app.get("/")
         def home():
             return list_services()
-        
+
+        @self.app.get("/test")
+        def test():
+            return list_services()
+
         @self.app.get("/services")
         def list_services():
             return {"services": self.services}
 
         # I noted that the 422 error doesn't get raised when parameters are invalid. Weird?
-        @self.app.post("/", status_code=status.HTTP_201_CREATED)
-        async def run_algo(algo_params: self.parameters_model):  # To check: this should automatically validate the parameters and return HTTP-422 otherwise?
+        @self.app.post(f"/{self.algorithm_name}/", status_code=status.HTTP_201_CREATED)
+        async def run_algo(
+            algo_params: self.parameters_model,
+        ):  # To check: this should automatically validate the parameters and return HTTP-422 otherwise?
             result_data_tuple = self.run_algorithm(**algo_params.dict())
             serialized_results = serverkit.serialize_result_tuple(result_data_tuple)
             return serialized_results
 
-        @self.app.get("/parameters", response_model=dict)
+        @self.app.get(f"/{self.algorithm_name}/parameters", response_model=dict)
         def get_algo_params():
             return self.parameters_model.model_json_schema()
 
-        @self.app.get("/sample_images", response_model=dict)
+        @self.app.get(f"/{self.algorithm_name}/sample_images", response_model=dict)
         def get_sample_images():
             images = self.load_sample_images()
             encoded_images = [

@@ -43,14 +43,25 @@ class Client:
     def algorithms(self, algorithms: Dict[str, str]):
         self._algorithms = algorithms
 
-    def run_algorithm(self, **algo_params) -> List[Tuple]:
+    def run_algorithm(self, algorithm: str = None, **algo_params) -> List[Tuple]:
+        if algorithm is None:
+            if len(self.algorithms) > 0:
+                algorithm = self.algorithms[0]
+            else:
+                print("No algorithms available.")
+                return []
+
+        if algorithm not in self.algorithms:
+            print(f"Not an available algorithm: {algorithm}")
+            return []
+
         # Encode all numpy array parameters
         for param in algo_params:
             if isinstance(algo_params[param], np.ndarray):
                 algo_params[param] = serverkit.encode_contents(algo_params[param])
 
         response = requests.post(
-            f"{self.server_url}/", json=algo_params, timeout=300
+            f"{self.server_url}/{algorithm}", json=algo_params, timeout=300
         )
         if response.status_code == 201:
             return serverkit.deserialize_result_tuple(response.json())
@@ -64,8 +75,15 @@ class Client:
             )
             return []
 
-    def get_algorithm_parameters(self) -> Dict:
-        response = requests.get(f"{self.server_url}/parameters")
+    def get_algorithm_parameters(self, algorithm: str = None) -> Dict:
+        if algorithm is None:
+            if len(self.algorithms) > 0:
+                algorithm = self.algorithms[0]
+            else:
+                print("No algorithms available.")
+                return []
+        
+        response = requests.get(f"{self.server_url}/{algorithm}/parameters")
         if response.status_code == 200:
             return response.json()
         else:
@@ -74,8 +92,16 @@ class Client:
             )
             return -1
 
-    def get_sample_images(self) -> "np.ndarray":
-        response = requests.get(f"{self.server_url}/sample_images")
+    def get_sample_images(self, algorithm: str = None) -> "np.ndarray":
+        if algorithm is None:
+            if len(self.algorithms) > 0:
+                algorithm = self.algorithms[0]
+            else:
+                print("No algorithms available.")
+                return []
+        
+        response = requests.get(f"{self.server_url}/{algorithm}/sample_images")
+
         if response.status_code == 200:
             images = []
             for content in response.json().get("sample_images"):

@@ -40,7 +40,7 @@ class Parameters(BaseModel):
         return image_array
 
 # Define the run_algorithm() method for your algorithm
-class Server(serverkit.AlgorithmServer):
+class Server(serverkit.Server):
     def __init__(
         self,
         algorithm_name: str="{{ cookiecutter.package }}",
