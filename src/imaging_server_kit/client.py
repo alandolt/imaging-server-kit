@@ -61,7 +61,12 @@ class Client:
                 algo_params[param] = serverkit.encode_contents(algo_params[param])
 
         response = requests.post(
-            f"{self.server_url}/{algorithm}", json=algo_params, timeout=300
+            f"{self.server_url}/{algorithm}/", 
+            json=algo_params,
+            headers={
+                'Content-Type': 'application/json',
+                'accept': 'application/json',
+            }
         )
         if response.status_code == 201:
             return serverkit.deserialize_result_tuple(response.json())

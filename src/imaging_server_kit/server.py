@@ -61,10 +61,6 @@ class Server:
         def home():
             return list_services()
 
-        @self.app.get("/test")
-        def test():
-            return list_services()
-
         @self.app.get("/services")
         def list_services():
             return {"services": self.services}
