@@ -25,6 +25,10 @@ dependencies = [
     "tifffile",
     "numpy",
     "scikit-image",
+    "geojson",
+    "docker",  # For the autostartup regsitry
+    "jinja2",  # For the /info route
+    "pyyaml",  # For the /info route
 ]
 
 [project.urls]

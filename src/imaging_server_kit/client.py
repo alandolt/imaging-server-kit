@@ -71,7 +71,7 @@ class Client:
         if response.status_code == 201:
             return serverkit.deserialize_result_tuple(response.json())
         elif response.status_code == 422:
-            # This actually doesn't occurr when it should...
+            # This doesn't get triggered when it should...
             print(f"Algorithm parameters are not valid!")
             return []
         else:

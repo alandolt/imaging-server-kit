@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/info.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>{{ algo_info.project_name }}</h1>
+        <p>Package name: {{ algo_info.package_name }}</p>
+        <p>Serverkit project author: {{ algo_info.serverkit_author }}</p>
+        <p>Description: {{ algo_info.description }}</p>
+        <p><a href="{{ algo_info.project_url }}">Original Project</a></p>
+        <p><a href="{{ algo_info.serverkit_repo_url }}">ServerKit Repository</a></p>
+        <p>Used for:
+        <ul>
+            {% for used_for_tag in algo_info.used_for %}
+            <li>{{ used_for_tag }}</li>
+            {% endfor %}
+        </ul>
+        </p>
+        <p>Tags:
+        <ul>
+            {% for tag in algo_info.tags %}
+            <li>{{ tag }}</li>
+            {% endfor %}
+        </ul>
+        </p>
+        <p>Algorithm parameters:</p>
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Widget Type</th>
+                <th>Default</th>
+                <th>Required</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, val in algo_params.items() %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ val.get("title") }}</td>
+                <td>{{ val.get("description") }}</td>
+                <td>{{ val.get("type") }}</td>
+                <td>{{ val.get("widget_type") }}</td>
+                <td>{{ val.get("default") }}</td>
+                <td>{{ val.get("required") }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

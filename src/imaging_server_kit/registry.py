@@ -1,19 +1,36 @@
 import requests
 from fastapi import FastAPI, Request, status, HTTPException
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+import importlib.resources
+
+templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
+static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
+
+templates = Jinja2Templates(directory=str(templates_dir))
 
 
 class Registry:
     def __init__(self) -> None:
         self.app = FastAPI()
-
+        self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
         self.services = {}
         self.register_routes()
 
     def register_routes(self):
-        @self.app.get("/")
-        def home():
-            return list_services()
-
+        @self.app.get("/", response_class=HTMLResponse)
+        async def home(request: Request):
+            services = list(self.services.keys())
+            print(f"{services=}")
+            return templates.TemplateResponse(
+                "index.html", 
+                {
+                    "request": request,
+                    "services": services,
+                }
+            )
+        
         @self.app.get("/services")
         def list_services():
             return {"services": list(self.services.keys())}
@@ -45,8 +62,13 @@ class Registry:
                     detail=f"Service {service_name} could not be deregistered because it is not in the list of services.",
                 )
 
+        @self.app.get("/{algorithm}/info", response_class=HTMLResponse)
+        async def get_algorithm_info(request: Request, algorithm: str):
+            response = requests.get(f"{self.services.get(algorithm)}/info")
+            return HTMLResponse(content=response.text, status_code=response.status_code)
+
         @self.app.get("/{algorithm}")
-        def get_algorithm_status(algorithm):
+        async def get_algorithm(request: Request, algorithm: str):
             response = requests.get(f"{self.services.get(algorithm)}/")
             return response.json()
 
