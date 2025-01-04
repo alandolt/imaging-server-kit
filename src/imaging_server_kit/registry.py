@@ -65,7 +65,8 @@ class Registry:
         @self.app.get("/{algorithm}/info", response_class=HTMLResponse)
         async def get_algorithm_info(request: Request, algorithm: str):
             algo_url = self.services.get(algorithm)
-            response = requests.get(f"{algo_url}/info")
+            print(f"{algo_url=}")
+            response = requests.get(f"{algo_url}/{algorithm}/info")
             return HTMLResponse(content=response.text, status_code=response.status_code)
 
         # @self.app.get("/{algorithm}/demo", response_class=HTMLResponse)
@@ -83,17 +84,17 @@ class Registry:
         async def run_algorithm(algorithm, request: Request):
             algo_url = self.services.get(algorithm)
             data = await request.json()
-            response = requests.post(f"{algo_url}/", json=data)
+            response = requests.post(f"{algo_url}/{algorithm}/", json=data)
             return response.json()
 
         @self.app.get("/{algorithm}/parameters")
         def get_algorithm_parameters(algorithm):
             algo_url = self.services.get(algorithm)
-            response = requests.get(f"{algo_url}/parameters")
+            response = requests.get(f"{algo_url}/{algorithm}/parameters")
             return response.json()
 
         @self.app.get("/{algorithm}/sample_images")
         def get_algorithm_sample_images(algorithm):
             algo_url = self.services.get(algorithm)
-            response = requests.get(f"{algo_url}/sample_images")
+            response = requests.get(f"{algo_url}/{algorithm}/sample_images")
             return response.json()

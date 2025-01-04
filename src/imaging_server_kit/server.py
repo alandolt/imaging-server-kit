@@ -110,7 +110,7 @@ class Server:
         def get_version():
             return serverkit.__version__
 
-        @self.app.get("/info", response_class=HTMLResponse)
+        @self.app.get(f"/{self.algorithm_name}/info", response_class=HTMLResponse)
         def info(request: Request):
             algo_info = load_from_yaml("metadata.yaml")
             algo_params_schema = get_algo_params()
