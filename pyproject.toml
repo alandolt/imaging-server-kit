@@ -29,6 +29,8 @@ dependencies = [
     "docker",  # For the autostartup regsitry
     "jinja2",  # For the /info route
     "pyyaml",  # For the /info route
+    "dash",  # For the dash app
+    "dash-bootstrap-components",  # For the dash app
 ]
 
 [project.urls]

@@ -24,13 +24,13 @@ class Registry:
             services = list(self.services.keys())
             print(f"{services=}")
             return templates.TemplateResponse(
-                "index.html", 
+                "index.html",
                 {
                     "request": request,
                     "services": services,
-                }
+                },
             )
-        
+
         @self.app.get("/services")
         def list_services():
             return {"services": list(self.services.keys())}
@@ -64,32 +64,36 @@ class Registry:
 
         @self.app.get("/{algorithm}/info", response_class=HTMLResponse)
         async def get_algorithm_info(request: Request, algorithm: str):
-            response = requests.get(f"{self.services.get(algorithm)}/info")
+            algo_url = self.services.get(algorithm)
+            response = requests.get(f"{algo_url}/info")
             return HTMLResponse(content=response.text, status_code=response.status_code)
+
+        # @self.app.get("/{algorithm}/demo", response_class=HTMLResponse)
+        # async def get_algorithm_demo(request: Request, algorithm: str):
+        #     response = requests.get(f"{self.services.get(algorithm)}/demo")
+        #     return HTMLResponse(content=response.text, status_code=response.status_code)
 
         @self.app.get("/{algorithm}")
         async def get_algorithm(request: Request, algorithm: str):
-            response = requests.get(f"{self.services.get(algorithm)}/")
+            algo_url = self.services.get(algorithm)
+            response = requests.get(f"{algo_url}/")
             return response.json()
 
         @self.app.post("/{algorithm}", status_code=status.HTTP_201_CREATED)
         async def run_algorithm(algorithm, request: Request):
+            algo_url = self.services.get(algorithm)
             data = await request.json()
-            response = requests.post(
-                f"{self.services.get(algorithm)}/{algorithm}/", json=data
-            )
+            response = requests.post(f"{algo_url}/", json=data)
             return response.json()
 
         @self.app.get("/{algorithm}/parameters")
         def get_algorithm_parameters(algorithm):
-            response = requests.get(
-                f"{self.services.get(algorithm)}/{algorithm}/parameters"
-            )
+            algo_url = self.services.get(algorithm)
+            response = requests.get(f"{algo_url}/parameters")
             return response.json()
 
         @self.app.get("/{algorithm}/sample_images")
         def get_algorithm_sample_images(algorithm):
-            response = requests.get(
-                f"{self.services.get(algorithm)}/{algorithm}/sample_images"
-            )
+            algo_url = self.services.get(algorithm)
+            response = requests.get(f"{algo_url}/sample_images")
             return response.json()

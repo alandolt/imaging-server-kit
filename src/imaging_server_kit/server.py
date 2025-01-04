@@ -1,14 +1,17 @@
+import importlib.resources
 import os
+from typing import List, Tuple, Type
+
+import imaging_server_kit as serverkit
 import requests
-from typing import Type, List, Tuple
-from pydantic import BaseModel, ConfigDict
-from fastapi import FastAPI, status, Request
-from fastapi.templating import Jinja2Templates
+import yaml
+from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-import yaml
-import importlib.resources
-import imaging_server_kit as serverkit
+from fastapi.templating import Jinja2Templates
+from imaging_server_kit.web_demo import generate_dash_app
+from pydantic import BaseModel, ConfigDict
+from starlette.middleware.wsgi import WSGIMiddleware
 
 templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
 static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
@@ -47,6 +50,19 @@ class Server:
         self.app = FastAPI(title=algorithm_name)
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
+        # Set up the web demo app
+        algo_params = parameters_model.model_json_schema().get("properties")
+
+        dash_app = generate_dash_app(
+            algorithm_name,
+            algo_params,
+            run_fnct=self.run_algorithm,
+            sample_image_fnct=self.load_sample_images,
+            prefix="/demo/",
+        )
+
+        self.app.mount("/demo", WSGIMiddleware(dash_app.server))
+
         self.app.on_event("startup")(self.register_with_registry)
         self.app.on_event("shutdown")(self.deregister_from_registry)
 
@@ -82,27 +98,31 @@ class Server:
             print(f"Failed to deregister {self.algorithm_name}: {response.json()}")
 
     def register_routes(self):
+        @self.app.get("/")
+        def home():
+            return list_services()
+
+        @self.app.get("/services")
+        def list_services():
+            return {"services": self.services}
+
+        @self.app.get("/version")
+        def get_version():
+            return serverkit.__version__
+
         @self.app.get("/info", response_class=HTMLResponse)
-        async def info(request: Request):
+        def info(request: Request):
             algo_info = load_from_yaml("metadata.yaml")
             algo_params_schema = get_algo_params()
             algo_params = parse_algo_params_schema(algo_params_schema)
             return templates.TemplateResponse(
-                "info.html", 
+                "info.html",
                 {
                     "request": request,
                     "algo_info": algo_info,
                     "algo_params": algo_params,
-                }
+                },
             )
-
-        @self.app.get("/")
-        def home():
-            return list_services()
-        
-        @self.app.get("/services")
-        def list_services():
-            return {"services": self.services}
 
         # I noted that the 422 error doesn't get raised when parameters are invalid. Weird?
         @self.app.post(f"/{self.algorithm_name}/", status_code=status.HTTP_201_CREATED)
@@ -124,10 +144,6 @@ class Server:
                 {"sample_image": serverkit.encode_contents(image)} for image in images
             ]
             return {"sample_images": encoded_images}
-        
-        @self.app.get("/version")
-        def get_version():
-            return serverkit.__version__
 
     def load_sample_images(self) -> List["np.ndarray"]:
         raise NotImplementedError("Subclasses should implement this method")
