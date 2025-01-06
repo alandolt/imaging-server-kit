@@ -1,7 +1,7 @@
 [project]
 name = "imaging-server-kit"
 dynamic = ["version"]
-description = "Run image processing algorithms in a FastAPI server."
+description = "Deploy image processing algorithms in FastAPI servers. "
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
