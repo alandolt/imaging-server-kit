@@ -124,11 +124,8 @@ class Server:
                 },
             )
 
-        # I noted that the 422 error doesn't get raised when parameters are invalid. Weird?
         @self.app.post(f"/{self.algorithm_name}/", status_code=status.HTTP_201_CREATED)
-        async def run_algo(
-            algo_params: self.parameters_model,
-        ):  # To check: this should automatically validate the parameters and return HTTP-422 otherwise?
+        async def run_algo(algo_params: self.parameters_model):
             result_data_tuple = self.run_algorithm(**algo_params.dict())
             serialized_results = serverkit.serialize_result_tuple(result_data_tuple)
             return serialized_results

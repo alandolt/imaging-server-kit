@@ -1,31 +1,35 @@
 import requests
 from typing import List, Dict, Tuple
-import imaging_server_kit as serverkit
 import numpy as np
+import imaging_server_kit as serverkit
+from imaging_server_kit.errors import (
+    AlgorithmNotFoundError,
+    AlgorithmServerError,
+    InvalidAlgorithmParametersError,
+    ServerRequestError,
+)
 
 
 class Client:
-    def __init__(self) -> None:
-        self._server_url = ""
+    def __init__(self, server_url: str = "") -> None:
+        self._server_url = server_url
         self._algorithms = {}
+        if server_url != "":
+            self.connect(server_url)
 
-    def connect(self, server_url: str) -> int:
+    def connect(self, server_url: str) -> None:
         self.server_url = server_url
-
+        endpoint = f"{self.server_url}/services"
         try:
-            response = requests.get(f"{self.server_url}/services")
-        except Exception:
-            self.algorithms = {}
-            return (-1, "Server unavailable.")
+            response = requests.get(endpoint)
+        except requests.exceptions.RequestException as e:
+            raise ServerRequestError(endpoint, e)
 
         if response.status_code == 200:
             services = response.json().get("services")
             self.algorithms = services
-            return (response.status_code, services)
         else:
-            response_body = response.json()
-            self.algorithms = {}
-            return (response.status_code, response_body)
+            raise AlgorithmServerError(response.status_code, response.json())
 
     @property
     def server_url(self) -> str:
@@ -43,69 +47,56 @@ class Client:
     def algorithms(self, algorithms: Dict[str, str]):
         self._algorithms = algorithms
 
-    def run_algorithm(self, algorithm: str = None, **algo_params) -> List[Tuple]:
-        if algorithm is None:
-            if len(self.algorithms) > 0:
-                algorithm = self.algorithms[0]
-            else:
-                print("No algorithms available.")
-                return []
+    def run_algorithm(self, algorithm=None, **algo_params) -> List[Tuple]:
+        algorithm = self._validate_algorithm(algorithm)
+        algo_params_encoded = self._encode_numpy_parameters(algo_params)
 
-        if algorithm not in self.algorithms:
-            print(f"Not an available algorithm: {algorithm}")
-            return []
+        try:
+            endpoint = f"{self.server_url}/{algorithm}/"
+            response = requests.post(
+                endpoint,
+                json=algo_params_encoded,
+                headers={
+                    "Content-Type": "application/json",
+                    "accept": "application/json",
+                },
+            )
+        except requests.exceptions.RequestException as e:
+            raise ServerRequestError(endpoint, e)
 
-        # Encode all numpy array parameters
-        for param in algo_params:
-            if isinstance(algo_params[param], np.ndarray):
-                algo_params[param] = serverkit.encode_contents(algo_params[param])
-
-        response = requests.post(
-            f"{self.server_url}/{algorithm}/", 
-            json=algo_params,
-            headers={
-                'Content-Type': 'application/json',
-                'accept': 'application/json',
-            }
-        )
         if response.status_code == 201:
             return serverkit.deserialize_result_tuple(response.json())
         elif response.status_code == 422:
-            # This doesn't get triggered when it should...
-            print(f"Algorithm parameters are not valid!")
-            return []
+            raise InvalidAlgorithmParametersError(response.status_code, response.json())
         else:
-            print(
-                f"Algorithm server returned an error status code: {response.status_code}"
-            )
-            return []
+            raise AlgorithmServerError(response.status_code, response.json())
 
-    def get_algorithm_parameters(self, algorithm: str = None) -> Dict:
-        if algorithm is None:
-            if len(self.algorithms) > 0:
-                algorithm = self.algorithms[0]
-            else:
-                print("No algorithms available.")
-                return []
+    def get_algorithm_parameters(self, algorithm=None) -> Dict:
+        algorithm = self._validate_algorithm(algorithm)
+
+        endpoint = f"{self.server_url}/{algorithm}/parameters"
+
+        try:
+            response = requests.get(endpoint)
+        except requests.exceptions.RequestException as e:
+            raise ServerRequestError(endpoint, e)
         
-        response = requests.get(f"{self.server_url}/{algorithm}/parameters")
         if response.status_code == 200:
             return response.json()
         else:
-            print(
-                f"Error status while attempting to get algoritm parameters: {response.status_code}"
-            )
-            return -1
+            raise AlgorithmServerError(response.status_code, response.json())
 
-    def get_sample_images(self, algorithm: str = None) -> "np.ndarray":
-        if algorithm is None:
-            if len(self.algorithms) > 0:
-                algorithm = self.algorithms[0]
-            else:
-                print("No algorithms available.")
-                return []
+    def get_sample_images(
+        self, algorithm=None, first_only: bool = False
+    ) -> List["np.ndarray"]:
+        algorithm = self._validate_algorithm(algorithm)
+
+        endpoint = f"{self.server_url}/{algorithm}/sample_images"
         
-        response = requests.get(f"{self.server_url}/{algorithm}/sample_images")
+        try:
+            response = requests.get(endpoint)
+        except requests.exceptions.RequestException as e:
+            raise ServerRequestError(endpoint, e)
 
         if response.status_code == 200:
             images = []
@@ -113,9 +104,28 @@ class Client:
                 encoded_image = content.get("sample_image")
                 image = serverkit.decode_contents(encoded_image)
                 images.append(image)
+                if first_only:
+                    return image
             return images
         else:
             print(
                 f"Error status while attempting to get algorithm sample images: {response.status_code}"
             )
             return -1
+
+    def _validate_algorithm(self, algorithm=None) -> str:
+        if algorithm is None:
+            if len(self.algorithms) > 0:
+                algorithm = self.algorithms[0]
+            else:
+                raise AlgorithmNotFoundError(algorithm)
+        else:
+            if algorithm not in self.algorithms:
+                raise AlgorithmNotFoundError(algorithm)
+        return algorithm
+
+    def _encode_numpy_parameters(self, algo_params: dict) -> dict:
+        for param in algo_params:
+            if isinstance(algo_params[param], np.ndarray):
+                algo_params[param] = serverkit.encode_contents(algo_params[param])
+        return algo_params
