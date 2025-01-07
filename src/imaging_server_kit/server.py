@@ -11,7 +11,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from imaging_server_kit.web_demo import generate_dash_app
 from pydantic import BaseModel, ConfigDict
-from starlette.middleware.wsgi import WSGIMiddleware
+from a2wsgi import WSGIMiddleware
+# from starlette.middleware.wsgi import WSGIMiddleware
+from contextlib import asynccontextmanager
 
 templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
 static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
@@ -47,7 +49,7 @@ class Server:
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
 
-        self.app = FastAPI(title=algorithm_name)
+        self.app = FastAPI(title=algorithm_name, lifespan=self.lifespan)
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
         # Set up the web demo app
@@ -63,14 +65,20 @@ class Server:
 
         self.app.mount(f"/{algorithm_name}/demo", WSGIMiddleware(dash_app.server))
 
-        self.app.on_event("startup")(self.register_with_registry)
-        self.app.on_event("shutdown")(self.deregister_from_registry)
+        # self.app.on_event("startup")(self.register_with_registry)
+        # self.app.on_event("shutdown")(self.deregister_from_registry)
 
         self.register_routes()
 
         self.services = [self.algorithm_name]
 
-    def register_with_registry(self):
+    @asynccontextmanager
+    async def lifespan(self, app: FastAPI):
+        await self.register_with_registry()
+        yield
+        await self.deregister_from_registry()
+
+    async def register_with_registry(self):
         try:
             response = requests.get(f"{REGISTRY_URL}/")
         except Exception:
@@ -89,7 +97,7 @@ class Server:
         else:
             print(f"Failed to register {self.algorithm_name}: {response.json()}")
 
-    def deregister_from_registry(self):
+    async def deregister_from_registry(self):
         deregister_url = f"{REGISTRY_URL}/deregister"
         response = requests.post(deregister_url, json={"name": self.algorithm_name})
         if response.status_code == 201:

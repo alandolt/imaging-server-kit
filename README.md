@@ -29,7 +29,7 @@ docker run -it --rm -p 8000:8000 serverkit/rembg
 
 **Run an algorithm server with multiple algorithms**
 
-See [deployment](./reference_deployment/README.md). The server will be running on `http://localhost:7000`.
+See [deployment](./reference_deployment/README.md). The server will be running on `http://localhost:8000`.
 
 ## Usage
 
@@ -48,7 +48,7 @@ from imaging_server_kit import Client
 
 client = Client()
 
-client.connect("http://localhost:7000")
+client.connect("http://localhost:8000")
 
 print(client.algorithms)
 # [`rembg`, `stardist`, `sam2`]

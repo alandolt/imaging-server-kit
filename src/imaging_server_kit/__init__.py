@@ -1,4 +1,9 @@
-from imaging_server_kit._version import __version__
+from ._version import version as __version__
+try:
+    from ._version import version as __version__
+except ImportError:
+    __version__ = "unknown"
+
 from imaging_server_kit.client import Client
 from imaging_server_kit.server import Server, Parameters
 from imaging_server_kit.registry import Registry
