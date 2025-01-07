@@ -1,0 +1,5 @@
+FROM registry.rcp.epfl.ch/imaging-server-kit/imaging-server-kit:3.9
+
+COPY start_registry.py .
+
+CMD ["uvicorn", "start_registry:app", "--host", "0.0.0.0", "--port", "8000"]

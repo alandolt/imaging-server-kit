@@ -58,10 +58,10 @@ class Server:
             algo_params,
             run_fnct=self.run_algorithm,
             sample_image_fnct=self.load_sample_images,
-            prefix="/demo/",
+            prefix=f"/{algorithm_name}/demo/",
         )
 
-        self.app.mount("/demo", WSGIMiddleware(dash_app.server))
+        self.app.mount(f"/{algorithm_name}/demo", WSGIMiddleware(dash_app.server))
 
         self.app.on_event("startup")(self.register_with_registry)
         self.app.on_event("shutdown")(self.deregister_from_registry)

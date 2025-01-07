@@ -24,3 +24,6 @@ venv/
 .python-version
 .DS_Store
 **/_version.py
+
+build.sh
+push.sh
