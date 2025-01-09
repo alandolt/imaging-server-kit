@@ -1,7 +1,7 @@
 ![EPFL Center for Imaging logo](https://imaging.epfl.ch/resources/logo-for-gitlab.svg)
 # 🪐 Imaging Server Kit
 
-[...]
+Deploy image processing algorithms in FastAPI servers and easily run them in Napari, QuPath, and more.
 
 ## Usage
 
@@ -17,12 +17,12 @@ Set up and run a server with one, or multiple algorithms from the Imaging Server
 - [Orientationpy](https://github.com/Imaging-Server-Kit/serverkit-orientationpy)
 <!-- - [Tau Fibrils Detector](https://github.com/Imaging-Server-Kit/serverkit-tau-fibrils-yolo) -->
 
-To do that, the recommended way is to edit a `docker-compose.yml` file and pull server images from `registry.rcp.epfl.ch`:
+To do that, the recommended way is to edit a `docker-compose.yml` file and pull server images from `registry.rcp.epfl.ch` (EPFL users only):
 
 ```{docker-compose.yml}
 services:
   servers_registry:
-    image: registry.rcp.epfl.ch/imaging-server-kit/imaging-server-kit:registry
+    image: mallorywittwerepfl/imaging-server-kit:registry
     ports:
       - "8000:8000"
   rembg:
@@ -45,7 +45,7 @@ The server should be accessible at http://localhost:8000.
 
 **Build the docker images yourself**
 
-To build the algorithm server images yourself, see [Reference Deployment](https://github.com/Imaging-Server-Kit/serverkit-deploy-docker).
+To build the algorithm server images yourself (e.g. if you are not from EPFL), see [Reference Deployment](https://github.com/Imaging-Server-Kit/serverkit-deploy-docker).
 
 **Create a server for your project**
 
