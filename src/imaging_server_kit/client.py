@@ -52,7 +52,7 @@ class Client:
         algo_params_encoded = self._encode_numpy_parameters(algo_params)
 
         try:
-            endpoint = f"{self.server_url}/{algorithm}/"
+            endpoint = f"{self.server_url}/{algorithm}/process"
             response = requests.post(
                 endpoint,
                 json=algo_params_encoded,

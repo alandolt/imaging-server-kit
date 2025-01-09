@@ -80,11 +80,11 @@ class Registry:
             response = requests.get(f"{algo_url}/")
             return response.json()
 
-        @self.app.post("/{algorithm}", status_code=status.HTTP_201_CREATED)
+        @self.app.post("/{algorithm}/process", status_code=status.HTTP_201_CREATED)
         async def run_algorithm(algorithm, request: Request):
             algo_url = self.services.get(algorithm)
             data = await request.json()
-            response = requests.post(f"{algo_url}/{algorithm}/", json=data)
+            response = requests.post(f"{algo_url}/{algorithm}/process", json=data)
             return response.json()
 
         @self.app.get("/{algorithm}/parameters")
