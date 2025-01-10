@@ -1,7 +1,12 @@
 ![EPFL Center for Imaging logo](https://imaging.epfl.ch/resources/logo-for-gitlab.svg)
 # 🪐 Imaging Server Kit
 
-Deploy image processing algorithms in FastAPI servers and easily run them in Napari, QuPath, and more.
+Deploy image processing algorithms in FastAPI servers and easily run them from Napari, QuPath, and more.
+
+The algorithm servers implement a common set of API endpoints for processing and to document the project. These include:
+  - `/process`: Runs the algorithm
+  - `/info`: Displays documentation about the algorithm usage
+  - `/sample_images`: Provides one or multiple sample images
 
 ## Usage
 
@@ -9,15 +14,15 @@ Deploy image processing algorithms in FastAPI servers and easily run them in Nap
 
 Set up and run a server with one, or multiple algorithms from the Imaging Server Kit collection (or your own):
 
-- [StarDist](https://github.com/Imaging-Server-Kit/serverkit-stardist)
-- [CellPose](https://github.com/Imaging-Server-Kit/serverkit-cellpose)
-- [Spotiflow](https://github.com/Imaging-Server-Kit/serverkit-spotiflow)
-- [Rembg](https://github.com/Imaging-Server-Kit/serverkit-rembg)
-- [Scikit-image LoG detector](https://github.com/Imaging-Server-Kit/serverkit-skimage-LoG)
-- [Orientationpy](https://github.com/Imaging-Server-Kit/serverkit-orientationpy)
+  - [StarDist](https://github.com/Imaging-Server-Kit/serverkit-stardist): Object detection with star-convex shapes
+  - [CellPose](https://github.com/Imaging-Server-Kit/serverkit-cellpose): A generalist algorithm for cellular segmentation
+  - [Spotiflow](https://github.com/Imaging-Server-Kit/serverkit-spotiflow): Accurate and efficient spot detection
+  - [Rembg](https://github.com/Imaging-Server-Kit/serverkit-rembg): A tool to remove images background
+  - [LoG detector](https://github.com/Imaging-Server-Kit/serverkit-skimage-LoG): Laplacian of Gaussian filter
+  - [Orientationpy](https://github.com/Imaging-Server-Kit/serverkit-orientationpy): Measurement of greyscale orientations
 <!-- - [Tau Fibrils Detector](https://github.com/Imaging-Server-Kit/serverkit-tau-fibrils-yolo) -->
 
-To do that, the recommended way is to edit a `docker-compose.yml` file and pull server images from `registry.rcp.epfl.ch` (EPFL users only):
+All of these algorithm servers can be installed locally or built and run with docker. To use docker and serve multiple algorithms, the recommended way is to edit a `docker-compose.yml` file and pull server images from `registry.rcp.epfl.ch` (EPFL users only):
 
 ```{docker-compose.yml}
 services:

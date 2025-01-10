@@ -17,37 +17,34 @@ def mask2features(segmentation_mask: np.ndarray) -> List[Feature]:
     features = []
     indices = np.unique(segmentation_mask)
     indices = np.delete(indices, indices == 0)  # remove background
-    if indices.size > 0:
-        for i in indices.tolist():
-            mask = np.array(segmentation_mask == i)
-            mask = np.pad(mask > 0, 1)
-            contours_find = find_contours(mask, 0.5)
-            if len(contours_find) == 1:
-                index = 0
-            else:
-                # TODO: Change this to handle panoptic segmentation cases
-                # if more than one contour is found, the largest one is returned
-                n_pixels = []
-                for _, item in enumerate(contours_find):
-                    n_pixels.append(len(item))
-                index = np.argmax(n_pixels)
-            contour = contours_find[index]
+
+    if indices.size == 0:
+        return features
+
+    # TODO: This is really inefficient for big images! Will need to improve it.
+    for i in indices.tolist():
+        mask = np.array(segmentation_mask == i)
+        mask = np.pad(mask > 0, 1)
+        contours_find = find_contours(mask, 0.5)
+        for detection_id, contour in enumerate(contours_find):
             contour -= 1  # reset padding
             contour_as_numpy = contour[:, np.argsort([1, 0])]  # Fix XY
             geom = Polygon([contour_as_numpy.tolist()])
-            features.append(Feature(geometry=geom, properties={"Detection ID": i}))
+            features.append(Feature(geometry=geom, properties={"Detection ID": detection_id, "Class": i}))
+
     return features
 
 
 def features2mask(features, image_shape):
     segmentation_mask = np.zeros(image_shape, dtype=np.uint16)
     for idx, feature in enumerate(features):
-        label_idx = idx+1  # Labels start at 1
         feature_coordinates = np.array(feature["geometry"]["coordinates"])
         feature_coordinates = np.squeeze(feature_coordinates)
         feature_coordinates = feature_coordinates[:, ::-1]  # Invert XY
         feature_mask = polygon2mask(image_shape, feature_coordinates)
-        segmentation_mask[feature_mask] = label_idx
+        feature_properites = feature.get("properties")
+        feature_class = feature_properites.get("Class")
+        segmentation_mask[feature_mask] = feature_class
     return segmentation_mask
 
 

@@ -69,6 +69,7 @@ def serialize_result_tuple(result_data_tuple: List[Tuple]) -> List[Dict]:
         if data_type == "image":
             features = serverkit.encode_contents(data.astype(np.float32))
         elif data_type == "labels":
+            data = data.astype(np.uint16)
             features = serverkit.mask2features(data)
             data_params['image_shape'] = data.shape
         elif data_type == "labels3d":
