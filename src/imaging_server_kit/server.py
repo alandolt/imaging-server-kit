@@ -5,15 +5,15 @@ from typing import List, Tuple, Type
 import imaging_server_kit as serverkit
 import requests
 import yaml
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from imaging_server_kit.web_demo import generate_dash_app
 from pydantic import BaseModel, ConfigDict
 from a2wsgi import WSGIMiddleware
-# from starlette.middleware.wsgi import WSGIMiddleware
 from contextlib import asynccontextmanager
+import asyncio
 
 templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
 static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
@@ -64,9 +64,6 @@ class Server:
         )
 
         self.app.mount(f"/{algorithm_name}/demo", WSGIMiddleware(dash_app.server))
-
-        # self.app.on_event("startup")(self.register_with_registry)
-        # self.app.on_event("shutdown")(self.deregister_from_registry)
 
         self.register_routes()
 
@@ -134,9 +131,17 @@ class Server:
 
         @self.app.post(f"/{self.algorithm_name}/process", status_code=status.HTTP_201_CREATED)
         async def run_algo(algo_params: self.parameters_model):
-            result_data_tuple = self.run_algorithm(**algo_params.dict())
-            serialized_results = serverkit.serialize_result_tuple(result_data_tuple)
+            try:
+                result_data_tuple = await asyncio.wait_for(self._run_algorithm(**algo_params.dict()), timeout=60)
+            except asyncio.TimeoutError:  # This works but doesn't actually kill the process... we need something else to terminate it
+                raise HTTPException(status_code=504, detail="Request timeout during processing.")
+            try:
+                serialized_results = await asyncio.wait_for(self._serialize_result_tuple(result_data_tuple), timeout=10)
+            except asyncio.TimeoutError:
+                raise HTTPException(status_code=504, detail="Request timeout during serialization.")
+            
             return serialized_results
+
 
         @self.app.get(f"/{self.algorithm_name}/parameters", response_model=dict)
         def get_algo_params():
@@ -150,8 +155,16 @@ class Server:
             ]
             return {"sample_images": encoded_images}
 
+    async def _serialize_result_tuple(self, result_data_tuple):
+        serialized_results = await asyncio.to_thread(serverkit.serialize_result_tuple, result_data_tuple)
+        return serialized_results
+    
+    async def _run_algorithm(self, **algo_params):
+        result_data_tuple = await asyncio.to_thread(self.run_algorithm, **algo_params)
+        return result_data_tuple
+    
     def load_sample_images(self) -> List["np.ndarray"]:
         raise NotImplementedError("Subclasses should implement this method")
-
+    
     def run_algorithm(self, **algo_params) -> List[Tuple]:
         raise NotImplementedError("Subclasses should implement this method")

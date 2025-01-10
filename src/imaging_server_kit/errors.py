@@ -13,17 +13,27 @@ class AlgorithmServerError(Exception):
     def __init__(self, status_code, response_body, message="Algorithm server returned an unexpected status_code"):
         self.status_code = status_code
         self.response_body = response_body
-        self.message = f"{message}: {status_code}\nResponse body: {response_body}"
+        self.message = f"{message}: {status_code}\nResponse: {response_body}"
+        super().__init__(self.message)
+
+
+class AlgorithmTimeoutError(Exception):
+    """Exception raised when a request to an algorithm server exceeds the time limit."""
+
+    def __init__(self, status_code, response_text, message="Algorithm server returned an unexpected status_code"):
+        self.status_code = status_code
+        self.response_text = response_text
+        self.message = f"{message}: {status_code}\nResponse: {response_text}"
         super().__init__(self.message)
 
 
 class InvalidAlgorithmParametersError(Exception):
     """Exception raised when a request to an algorithm server is made with invalid algorithm parameters."""
 
-    def __init__(self, status_code, response_body, message="Algorithm parameters were invalidated by the server"):
+    def __init__(self, status_code, response_text, message="Algorithm parameters were invalidated by the server"):
         self.status_code = status_code
-        self.response_body = response_body
-        pydantic_details = response_body.get("detail")[0]
+        self.response_text = response_text
+        pydantic_details = response_text.get("detail")[0]
         pydantic_validation_msg = pydantic_details.get("msg")
         pydantic_failing_param = pydantic_details.get("loc")[1]
         pydantic_failing_param_value = pydantic_details.get("input")

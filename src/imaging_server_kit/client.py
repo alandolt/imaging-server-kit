@@ -7,6 +7,7 @@ from imaging_server_kit.errors import (
     AlgorithmServerError,
     InvalidAlgorithmParametersError,
     ServerRequestError,
+    AlgorithmTimeoutError,
 )
 
 
@@ -29,7 +30,7 @@ class Client:
             services = response.json().get("services")
             self.algorithms = services
         else:
-            raise AlgorithmServerError(response.status_code, response.json())
+            raise AlgorithmServerError(response.status_code, response.text)
 
     @property
     def server_url(self) -> str:
@@ -68,8 +69,10 @@ class Client:
             return serverkit.deserialize_result_tuple(response.json())
         elif response.status_code == 422:
             raise InvalidAlgorithmParametersError(response.status_code, response.json())
+        elif response.status_code == 504:
+            raise AlgorithmTimeoutError(response.status_code, response.text)
         else:
-            raise AlgorithmServerError(response.status_code, response.json())
+            raise AlgorithmServerError(response.status_code, response.text)
 
     def get_algorithm_parameters(self, algorithm=None) -> Dict:
         algorithm = self._validate_algorithm(algorithm)
@@ -84,7 +87,7 @@ class Client:
         if response.status_code == 200:
             return response.json()
         else:
-            raise AlgorithmServerError(response.status_code, response.json())
+            raise AlgorithmServerError(response.status_code, response.text)
 
     def get_sample_images(
         self, algorithm=None, first_only: bool = False
