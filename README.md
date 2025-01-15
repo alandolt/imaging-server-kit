@@ -27,9 +27,10 @@ All of these algorithm servers can be installed locally or built and run with do
 ```{docker-compose.yml}
 services:
   servers_registry:
-    image: mallorywittwerepfl/imaging-server-kit:registry
+    image: mallorywittwerepfl/imaging-server-kit:latest
     ports:
       - "8000:8000"
+    command: python3 start_registry.py
   rembg:
     image: registry.rcp.epfl.ch/imaging-server-kit/serverkit-rembg:latest
     depends_on:
