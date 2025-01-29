@@ -38,8 +38,8 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://gitlab.com/epfl-center-for-imaging/imaging-server-kit"
-repository = "https://gitlab.com/epfl-center-for-imaging/imaging-server-kit"
+homepage = "https://github.com/Imaging-Server-Kit/imaging-server-kit"
+repository = "https://github.com/Imaging-Server-Kit/imaging-server-kit"
 
 [build-system]
 requires = ["setuptools>=42.0.0", "wheel", "setuptools_scm"]
