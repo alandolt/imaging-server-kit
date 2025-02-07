@@ -14,7 +14,9 @@ from imaging_server_kit.serialization import (
 )
 from imaging_server_kit.geometry import (
     mask2features,
+    instance_mask2features,
     features2mask,
+    features2instance_mask,
     boxes2features,
     features2boxes,
     points2features,

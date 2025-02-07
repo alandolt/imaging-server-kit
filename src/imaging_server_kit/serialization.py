@@ -72,6 +72,10 @@ def serialize_result_tuple(result_data_tuple: List[Tuple]) -> List[Dict]:
             data = data.astype(np.uint16)
             features = serverkit.mask2features(data)
             data_params['image_shape'] = data.shape
+        elif data_type == "instance_mask":
+            data = data.astype(np.uint16)
+            features = serverkit.instance_mask2features(data)
+            data_params['image_shape'] = data.shape
         elif data_type == "labels3d":
             features = serverkit.encode_contents(data.astype(np.uint16))
         elif data_type == "points":
@@ -114,6 +118,9 @@ def deserialize_result_tuple(serialized_results: List[Dict]) -> List[Tuple]:
         elif data_type == "labels":
             image_shape = data_params.pop('image_shape')
             data = serverkit.features2mask(features, image_shape)
+        elif data_type == "instance_mask":
+            image_shape = data_params.pop('image_shape')
+            data = serverkit.features2instance_mask(features, image_shape)
         elif data_type == "labels3d":
             data = serverkit.decode_contents(features).astype(int)
         elif data_type == "points":

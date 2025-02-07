@@ -45,9 +45,19 @@ class Parameters(BaseModel):
 
 
 class Server:
-    def __init__(self, algorithm_name: str, parameters_model: Type[BaseModel]):
+    def __init__(
+        self,
+        algorithm_name: str,
+        parameters_model: Type[BaseModel],
+        metadata_file: str = None,
+    ):
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
+
+        if metadata_file is None:
+            self.metadata_file = "metadata.yaml"
+        else:
+            self.metadata_file = metadata_file
 
         self.app = FastAPI(title=algorithm_name, lifespan=self.lifespan)
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
@@ -117,7 +127,7 @@ class Server:
 
         @self.app.get(f"/{self.algorithm_name}/info", response_class=HTMLResponse)
         def info(request: Request):
-            algo_info = load_from_yaml("metadata.yaml")
+            algo_info = load_from_yaml(self.metadata_file)
             algo_params_schema = get_algo_params()
             algo_params = parse_algo_params_schema(algo_params_schema)
             return templates.TemplateResponse(
@@ -129,19 +139,30 @@ class Server:
                 },
             )
 
-        @self.app.post(f"/{self.algorithm_name}/process", status_code=status.HTTP_201_CREATED)
+        @self.app.post(
+            f"/{self.algorithm_name}/process", status_code=status.HTTP_201_CREATED
+        )
         async def run_algo(algo_params: self.parameters_model):
             try:
-                result_data_tuple = await asyncio.wait_for(self._run_algorithm(**algo_params.dict()), timeout=60)
-            except asyncio.TimeoutError:  # This works but doesn't actually kill the process... we need something else to terminate it
-                raise HTTPException(status_code=504, detail="Request timeout during processing.")
+                result_data_tuple = await asyncio.wait_for(
+                    self._run_algorithm(**algo_params.dict()), timeout=60
+                )
+            except (
+                asyncio.TimeoutError
+            ):  # This works but doesn't actually kill the process... we need something else to terminate it
+                raise HTTPException(
+                    status_code=504, detail="Request timeout during processing."
+                )
             try:
-                serialized_results = await asyncio.wait_for(self._serialize_result_tuple(result_data_tuple), timeout=10)
+                serialized_results = await asyncio.wait_for(
+                    self._serialize_result_tuple(result_data_tuple), timeout=10
+                )
             except asyncio.TimeoutError:
-                raise HTTPException(status_code=504, detail="Request timeout during serialization.")
-            
-            return serialized_results
+                raise HTTPException(
+                    status_code=504, detail="Request timeout during serialization."
+                )
 
+            return serialized_results
 
         @self.app.get(f"/{self.algorithm_name}/parameters", response_model=dict)
         def get_algo_params():
@@ -156,15 +177,17 @@ class Server:
             return {"sample_images": encoded_images}
 
     async def _serialize_result_tuple(self, result_data_tuple):
-        serialized_results = await asyncio.to_thread(serverkit.serialize_result_tuple, result_data_tuple)
+        serialized_results = await asyncio.to_thread(
+            serverkit.serialize_result_tuple, result_data_tuple
+        )
         return serialized_results
-    
+
     async def _run_algorithm(self, **algo_params):
         result_data_tuple = await asyncio.to_thread(self.run_algorithm, **algo_params)
         return result_data_tuple
-    
+
     def load_sample_images(self) -> List["np.ndarray"]:
         raise NotImplementedError("Subclasses should implement this method")
-    
+
     def run_algorithm(self, **algo_params) -> List[Tuple]:
         raise NotImplementedError("Subclasses should implement this method")
