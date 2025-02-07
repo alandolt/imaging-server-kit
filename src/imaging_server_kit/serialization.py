@@ -89,8 +89,13 @@ def serialize_result_tuple(result_data_tuple: List[Tuple]) -> List[Dict]:
             features = serverkit.vectors2features(data)
         elif data_type == "tracks":
             features = serverkit.encode_contents(data.astype(np.float32))
+        elif data_type == "class":
+            features = data  # A simple string
+        elif data_type == "text":
+            features = data  # A text string
         else:
             print(f"Unknown data_type: {data_type}")
+            features = None
         
         serialized_results.append(
             {
@@ -133,6 +138,10 @@ def deserialize_result_tuple(serialized_results: List[Dict]) -> List[Tuple]:
             data = serverkit.features2vectors(features)
         elif data_type == "tracks":
             data = serverkit.decode_contents(features).astype(float)
+        elif data_type == "class":
+            data = features  # A simple string
+        elif data_type == "text":
+            data = features  # A text string
         else:
             print(f"Unknown data_type: {data_type}")
 
