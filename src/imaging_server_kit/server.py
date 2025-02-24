@@ -145,7 +145,7 @@ class Server:
         async def run_algo(algo_params: self.parameters_model):
             try:
                 result_data_tuple = await asyncio.wait_for(
-                    self._run_algorithm(**algo_params.dict()), timeout=60
+                    self._run_algorithm(**algo_params.dict()), timeout=600
                 )
             except (
                 asyncio.TimeoutError
@@ -155,7 +155,7 @@ class Server:
                 )
             try:
                 serialized_results = await asyncio.wait_for(
-                    self._serialize_result_tuple(result_data_tuple), timeout=10
+                    self._serialize_result_tuple(result_data_tuple), timeout=600
                 )
             except asyncio.TimeoutError:
                 raise HTTPException(
