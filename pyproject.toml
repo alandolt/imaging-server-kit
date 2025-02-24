@@ -28,6 +28,7 @@ dependencies = [
     "tifffile",
     "numpy",
     "scikit-image",
+    "opencv-contrib-python-headless",
     "imantics",
     "geojson",
     "jinja2",  # For the /info route
