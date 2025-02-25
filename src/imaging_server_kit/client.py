@@ -111,10 +111,7 @@ class Client:
                     return image
             return images
         else:
-            print(
-                f"Error status while attempting to get algorithm sample images: {response.status_code}"
-            )
-            return -1
+            raise AlgorithmServerError(response.status_code, response.text)
 
     def _validate_algorithm(self, algorithm=None) -> str:
         if algorithm is None:
