@@ -5,7 +5,7 @@ from typing import List, Tuple, Type
 import imaging_server_kit as serverkit
 import requests
 import yaml
-from fastapi import FastAPI, Request, status, HTTPException
+from fastapi import FastAPI, Request, status, HTTPException, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -19,6 +19,17 @@ templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templa
 static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
 
 templates = Jinja2Templates(directory=str(templates_dir))
+
+from imaging_server_kit.users_utils import (
+    create_db_and_tables,
+    fastapi_users,
+    auth_backend,
+    UserRead,
+    UserUpdate,
+    UserCreate,
+    User,
+    current_active_user,
+)
 
 
 def load_from_yaml(file_path: str):
@@ -60,9 +71,36 @@ class Server:
             self.metadata_file = metadata_file
 
         self.app = FastAPI(title=algorithm_name, lifespan=self.lifespan)
+
+        # Users
+        self.app.include_router(
+            fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
+        )
+        self.app.include_router(
+            fastapi_users.get_register_router(UserRead, UserCreate),
+            prefix="/auth",
+            tags=["auth"],
+        )
+        self.app.include_router(
+            fastapi_users.get_reset_password_router(),
+            prefix="/auth",
+            tags=["auth"],
+        )
+        self.app.include_router(
+            fastapi_users.get_verify_router(UserRead),
+            prefix="/auth",
+            tags=["auth"],
+        )
+        self.app.include_router(
+            fastapi_users.get_users_router(UserRead, UserUpdate),
+            prefix="/users",
+            tags=["users"],
+        )
+
+        # Info HTML
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-        # Set up the web demo app
+        # Web demo app
         algo_params = parameters_model.model_json_schema().get("properties")
 
         dash_app = generate_dash_app(
@@ -82,6 +120,7 @@ class Server:
     @asynccontextmanager
     async def lifespan(self, app: FastAPI):
         await self.register_with_registry()
+        await create_db_and_tables()
         yield
         await self.deregister_from_registry()
 
@@ -138,11 +177,19 @@ class Server:
                     "algo_params": algo_params,
                 },
             )
+        
+        @self.app.get(f"/register", response_class=HTMLResponse)
+        def register(request: Request):
+            return templates.TemplateResponse("register.html", {"request": request})
+        
+        @self.app.get(f"/login", response_class=HTMLResponse)
+        def login(request: Request):
+            return templates.TemplateResponse("login.html", {"request": request})
 
         @self.app.post(
             f"/{self.algorithm_name}/process", status_code=status.HTTP_201_CREATED
         )
-        async def run_algo(algo_params: self.parameters_model):
+        async def run_algo(algo_params: self.parameters_model, user: User = Depends(current_active_user)):
             try:
                 result_data_tuple = await asyncio.wait_for(
                     self._run_algorithm(**algo_params.dict()), timeout=600

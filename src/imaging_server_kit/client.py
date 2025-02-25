@@ -1,4 +1,5 @@
 import requests
+import webbrowser
 from typing import List, Dict, Tuple
 import numpy as np
 import imaging_server_kit as serverkit
@@ -17,6 +18,8 @@ class Client:
         self._algorithms = {}
         if server_url != "":
             self.connect(server_url)
+        
+        self.token = None
 
     def connect(self, server_url: str) -> None:
         self.server_url = server_url
@@ -29,6 +32,31 @@ class Client:
         if response.status_code == 200:
             services = response.json().get("services")
             self.algorithms = services
+        else:
+            raise AlgorithmServerError(response.status_code, response.text)
+        
+    def browser_login(self):
+        webbrowser.open(f"{self.server_url}/login")
+        # How to retreive the access_token when the use logs in via the web page?
+        # self.token = [...]
+        # This might be complicated...
+    
+    def login(self, username, password):
+        endpoint = f"{self.server_url}/auth/jwt/login"
+        try:
+            response = requests.post(
+                endpoint,
+                data={
+                    "username": username,
+                    "password": password,
+                },
+            )
+        except requests.exceptions.RequestException as e:
+            raise ServerRequestError(endpoint, e)
+
+        if response.status_code == 200:
+            token = response.json().get("access_token")
+            self.token = token
         else:
             raise AlgorithmServerError(response.status_code, response.text)
 
@@ -60,6 +88,7 @@ class Client:
                 headers={
                     "Content-Type": "application/json",
                     "accept": "application/json",
+                    "Authorization": f"Bearer {self.token}",
                 },
             )
         except requests.exceptions.RequestException as e:

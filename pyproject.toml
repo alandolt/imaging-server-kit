@@ -25,6 +25,8 @@ dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "python-multipart",
+    "fastapi-users[sqlalchemy]",
+    "aiosqlite",
     "tifffile",
     "numpy",
     "scikit-image",
