@@ -35,11 +35,11 @@ class Client:
         else:
             raise AlgorithmServerError(response.status_code, response.text)
         
-    def browser_login(self):
-        webbrowser.open(f"{self.server_url}/login")
-        # How to retreive the access_token when the use logs in via the web page?
-        # self.token = [...]
-        # This might be complicated...
+    # def browser_login(self):
+    #     webbrowser.open(f"{self.server_url}/login")
+    #     # How to retreive the access_token when the user logs in via the web page?
+    #     # self.token = [...]
+    #     # This might be complicated...
     
     def login(self, username, password):
         endpoint = f"{self.server_url}/auth/jwt/login"

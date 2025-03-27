@@ -22,6 +22,17 @@ templates = Jinja2Templates(directory=str(templates_dir))
 
 PROCESS_TIMEOUT_SEC = 3600
 
+from imaging_server_kit.users_utils import (
+    create_db_and_tables,
+    fastapi_users,
+    auth_backend,
+    UserRead,
+    UserUpdate,
+    UserCreate,
+    User,
+    current_active_user,
+)
+
 
 def load_from_yaml(file_path: str):
     with open(file_path, "r") as file:
@@ -46,7 +57,7 @@ class Parameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class AlgorithmServer:
+class AuthenticatedAlgorithmServer:
     def __init__(
         self,
         algorithm_name: str,
@@ -62,6 +73,33 @@ class AlgorithmServer:
             self.metadata_file = metadata_file
 
         self.app = FastAPI(title=algorithm_name, lifespan=self.lifespan)
+
+        # Users
+        self.app.include_router(
+            fastapi_users.get_auth_router(auth_backend),
+            prefix="/auth/jwt",
+            tags=["auth"],
+        )
+        self.app.include_router(
+            fastapi_users.get_register_router(UserRead, UserCreate),
+            prefix="/auth",
+            tags=["auth"],
+        )
+        self.app.include_router(
+            fastapi_users.get_reset_password_router(),
+            prefix="/auth",
+            tags=["auth"],
+        )
+        self.app.include_router(
+            fastapi_users.get_verify_router(UserRead),
+            prefix="/auth",
+            tags=["auth"],
+        )
+        self.app.include_router(
+            fastapi_users.get_users_router(UserRead, UserUpdate),
+            prefix="/users",
+            tags=["users"],
+        )
 
         # Info HTML
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
@@ -86,6 +124,7 @@ class AlgorithmServer:
     @asynccontextmanager
     async def lifespan(self, app: FastAPI):
         await self.register_with_algohub()
+        await create_db_and_tables()
         yield
         await self.deregister_from_algohub()
 
@@ -156,6 +195,7 @@ class AlgorithmServer:
         )
         async def run_algo(
             algo_params: self.parameters_model,
+            user: User = Depends(current_active_user),
         ):
             try:
                 result_data_tuple = await asyncio.wait_for(
