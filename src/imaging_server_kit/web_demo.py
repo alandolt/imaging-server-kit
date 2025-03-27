@@ -71,7 +71,7 @@ class Viewer:
         return [
             data_params["name"]
             for (data, data_params, data_type) in self.layer_stack
-            if data_type == "labels"
+            if data_type == "mask"
         ]
 
     def add_image(self, image: np.ndarray):
@@ -95,7 +95,7 @@ class Viewer:
 
     def add_labels(self, labels: np.ndarray):
         """Add a segmentation map (labels) to the figure."""
-        layer_name = f"Labels-{self.layer_idx_image}"
+        layer_name = f"Masks-{self.layer_idx_image}"
         contour = skimage.measure.find_contours(labels)
         for ctr in contour:
             y, x = ctr.T - 1
@@ -111,7 +111,7 @@ class Viewer:
                 name=layer_name,
             )
 
-        self.layer_stack.append((labels, {"name": layer_name}, "labels"))
+        self.layer_stack.append((labels, {"name": layer_name}, "mask"))
 
     def remove_layer_by_name(self, layer_name):
         indeces_to_remove = []
@@ -135,7 +135,7 @@ class Viewer:
         for layer_data, layer_params, layer_type in data_tuple:
             if layer_type == "image":
                 self.add_image(layer_data)  # Use layer_data for the image
-            elif layer_type == "labels":
+            elif layer_type == "mask":
                 self.add_labels(layer_data)  # Use layer_data for the labels
             else:
                 print("Unknown layer type: ", layer_type)
@@ -178,7 +178,7 @@ def _parameters_ui(viewer, algo_params) -> List:
                 id=param_name,
                 options=viewer.image_layer_names,
             )
-        elif param_widget_type == "labels":
+        elif param_widget_type == "mask":
             component = dcc.Dropdown(
                 id=param_name,
                 options=viewer.labels_layer_names,
@@ -312,7 +312,7 @@ def _runnable_params(viewer, algo_params, algo_inputs):
     for algo_param_name, algo_param_type, value in zip(
         list(algo_params.keys()), algo_parameter_types, algo_inputs
     ):
-        if algo_param_type in ["image", "labels"]:
+        if algo_param_type in ["image", "mask"]:
             parsed_value = viewer.get_layer_data_by_name(value)
         else:
             parsed_value = value

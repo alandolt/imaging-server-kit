@@ -20,6 +20,8 @@ static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
 
 templates = Jinja2Templates(directory=str(templates_dir))
 
+PROCESS_TIMEOUT_SEC = 3600
+
 from imaging_server_kit.users_utils import (
     create_db_and_tables,
     fastapi_users,
@@ -46,7 +48,7 @@ def parse_algo_params_schema(algo_params_schema):
     return algo_params
 
 
-REGISTRY_URL = os.getenv("REGISTRY_URL", "http://servers_registry:8000")
+ALGORITHM_HUB_URL = os.getenv("ALGORITHM_HUB_URL", "http://algorithm_hub:8000")
 
 
 class Parameters(BaseModel):
@@ -119,20 +121,20 @@ class Server:
 
     @asynccontextmanager
     async def lifespan(self, app: FastAPI):
-        await self.register_with_registry()
+        await self.register_with_algohub()
         await create_db_and_tables()
         yield
-        await self.deregister_from_registry()
+        await self.deregister_from_algohub()
 
-    async def register_with_registry(self):
+    async def register_with_algohub(self):
         try:
-            response = requests.get(f"{REGISTRY_URL}/")
+            response = requests.get(f"{ALGORITHM_HUB_URL}/")
         except Exception:
-            print("Registry unavailable.")
+            print("Algorithm hub unavailable.")
             return
 
         response = requests.post(
-            f"{REGISTRY_URL}/register",
+            f"{ALGORITHM_HUB_URL}/register",
             json={
                 "name": self.algorithm_name,
                 "url": f"http://{self.algorithm_name}:8000",
@@ -143,8 +145,8 @@ class Server:
         else:
             print(f"Failed to register {self.algorithm_name}: {response.json()}")
 
-    async def deregister_from_registry(self):
-        deregister_url = f"{REGISTRY_URL}/deregister"
+    async def deregister_from_algohub(self):
+        deregister_url = f"{ALGORITHM_HUB_URL}/deregister"
         response = requests.post(deregister_url, json={"name": self.algorithm_name})
         if response.status_code == 201:
             print(f"Service {self.algorithm_name} deregistered.")
@@ -192,7 +194,7 @@ class Server:
         async def run_algo(algo_params: self.parameters_model, user: User = Depends(current_active_user)):
             try:
                 result_data_tuple = await asyncio.wait_for(
-                    self._run_algorithm(**algo_params.dict()), timeout=600
+                    self._run_algorithm(**algo_params.dict()), timeout=PROCESS_TIMEOUT_SEC,
                 )
             except (
                 asyncio.TimeoutError
@@ -202,7 +204,7 @@ class Server:
                 )
             try:
                 serialized_results = await asyncio.wait_for(
-                    self._serialize_result_tuple(result_data_tuple), timeout=600
+                    self._serialize_result_tuple(result_data_tuple), timeout=PROCESS_TIMEOUT_SEC,
                 )
             except asyncio.TimeoutError:
                 raise HTTPException(
