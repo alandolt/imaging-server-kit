@@ -26,19 +26,19 @@ All of these algorithm servers can be installed locally or built and run with do
 
 ```{docker-compose.yml}
 services:
-  servers_registry:
+  algorithm_hub:
     image: mallorywittwerepfl/imaging-server-kit:latest
     ports:
       - "8000:8000"
-    command: python3 start_registry.py
+    command: python3 start_algorithm_hub.py
   rembg:
     image: registry.rcp.epfl.ch/imaging-server-kit/serverkit-rembg:latest
     depends_on:
-      - servers_registry
+      - algorithm_hub
   skimage-log:
     image: registry.rcp.epfl.ch/imaging-server-kit/serverkit-skimage-log:latest
     depends_on:
-      - servers_registry
+      - algorithm_hub
 ```
 
 Start the server with
@@ -108,7 +108,7 @@ Build the `imaging-server-kit` docker image for a specific Python version:
 docker build --build-arg PYTHON_VERSION=3.9 -t imaging-server-kit:3.9 .
 ```
 
-Run [build.sh](./build.sh) to build docker images for Python 3.9, 3.10, 3.11, GPU and the server kit registry:
+Run [build.sh](./build.sh) to build docker images for Python 3.9, 3.10, 3.11, GPU and the algorithm hub:
 
 ```
 bash ./build.sh

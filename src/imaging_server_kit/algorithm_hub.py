@@ -11,7 +11,7 @@ static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
 templates = Jinja2Templates(directory=str(templates_dir))
 
 
-class Registry:
+class AlgorithmHub:
     def __init__(self) -> None:
         self.app = FastAPI()
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
