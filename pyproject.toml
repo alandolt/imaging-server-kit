@@ -3,7 +3,7 @@ name = "imaging-server-kit"
 dynamic = ["version"]
 description = "Deploy image processing algorithms in FastAPI servers. "
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [{ name = "Mallory Wittwer", email = "mallory.wittwer@epfl.ch" }]
 
@@ -15,9 +15,8 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Image Processing",
 ]
 
@@ -33,13 +32,13 @@ dependencies = [
     "opencv-contrib-python-headless",
     "imantics",
     "geojson",
-    "jinja2",  # For the /info route
-    "pyyaml",  # For the /info route
-    "dash",  # For the dash app
-    "dash-bootstrap-components",  # For the dash app
-    "a2wsgi",  # For the dash app
-    "pytest",  # For testing
-    "pydantic>=2.0"
+    "jinja2",                         # For the /info route
+    "pyyaml",                         # For the /info route
+    "dash",                           # For the dash app
+    "dash-bootstrap-components",      # For the dash app
+    "a2wsgi",                         # For the dash app
+    "pytest",                         # For testing
+    "pydantic>=2.0",
 ]
 
 [project.urls]
