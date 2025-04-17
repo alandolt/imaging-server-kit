@@ -30,3 +30,6 @@ from imaging_server_kit.geometry import (
     vectors2features,
     features2vectors,
 )
+
+from imaging_server_kit.decorator import algorithm_server
+from imaging_server_kit.multialgo_server import MultiAlgorithmServer

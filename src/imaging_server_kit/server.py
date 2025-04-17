@@ -1,26 +1,28 @@
+import asyncio
 import importlib.resources
 import os
+from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import List, Tuple, Type
 
 import imaging_server_kit as serverkit
 import requests
 import yaml
-from fastapi import FastAPI, Request, status, HTTPException, Depends
+from a2wsgi import WSGIMiddleware
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from imaging_server_kit.web_demo import generate_dash_app
 from pydantic import BaseModel, ConfigDict
-from a2wsgi import WSGIMiddleware
-from contextlib import asynccontextmanager
-import asyncio
 
-templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
-static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
-
+templates_dir = Path(
+    importlib.resources.files("imaging_server_kit").joinpath("templates")
+)
+static_dir = Path(importlib.resources.files("imaging_server_kit").joinpath("static"))
 templates = Jinja2Templates(directory=str(templates_dir))
 
-PROCESS_TIMEOUT_SEC = 3600
+PROCESS_TIMEOUT_SEC = 3600  # Client timeout for the /process route
 
 
 def load_from_yaml(file_path: str):
@@ -51,15 +53,11 @@ class AlgorithmServer:
         self,
         algorithm_name: str,
         parameters_model: Type[BaseModel],
-        metadata_file: str = None,
+        metadata_file: str = "metadata.yaml",
     ):
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
-
-        if metadata_file is None:
-            self.metadata_file = "metadata.yaml"
-        else:
-            self.metadata_file = metadata_file
+        self.metadata_file = metadata_file
 
         self.app = FastAPI(title=algorithm_name, lifespan=self.lifespan)
 
@@ -118,8 +116,11 @@ class AlgorithmServer:
 
     def register_routes(self):
         @self.app.get("/")
-        def home():
-            return list_services()
+        def home(request: Request):
+            if Path(self.metadata_file).exists():
+                return info(request)
+            else:
+                return list_services()
 
         @self.app.get("/services")
         def list_services():
@@ -143,42 +144,13 @@ class AlgorithmServer:
                 },
             )
 
-        @self.app.get(f"/register", response_class=HTMLResponse)
-        def register(request: Request):
-            return templates.TemplateResponse("register.html", {"request": request})
-
-        @self.app.get(f"/login", response_class=HTMLResponse)
-        def login(request: Request):
-            return templates.TemplateResponse("login.html", {"request": request})
-
         @self.app.post(
             f"/{self.algorithm_name}/process", status_code=status.HTTP_201_CREATED
         )
         async def run_algo(
             algo_params: self.parameters_model,
         ):
-            try:
-                result_data_tuple = await asyncio.wait_for(
-                    self._run_algorithm(**algo_params.dict()),
-                    timeout=PROCESS_TIMEOUT_SEC,
-                )
-            except (
-                asyncio.TimeoutError
-            ):  # This works but doesn't actually kill the process... we need something else to terminate it
-                raise HTTPException(
-                    status_code=504, detail="Request timeout during processing."
-                )
-            try:
-                serialized_results = await asyncio.wait_for(
-                    self._serialize_result_tuple(result_data_tuple),
-                    timeout=PROCESS_TIMEOUT_SEC,
-                )
-            except asyncio.TimeoutError:
-                raise HTTPException(
-                    status_code=504, detail="Request timeout during serialization."
-                )
-
-            return serialized_results
+            return await self._run_algo_logic(algo_params)
 
         @self.app.get(f"/{self.algorithm_name}/parameters", response_model=dict)
         def get_algo_params():
@@ -196,6 +168,28 @@ class AlgorithmServer:
         serialized_results = await asyncio.to_thread(
             serverkit.serialize_result_tuple, result_data_tuple
         )
+        return serialized_results
+
+    async def _run_algo_logic(self, algo_params):
+        try:
+            result_data_tuple = await asyncio.wait_for(
+                self._run_algorithm(**algo_params.dict()),
+                timeout=PROCESS_TIMEOUT_SEC,
+            )
+        except asyncio.TimeoutError:  # TODO: This doesn't kill the thread...
+            raise HTTPException(
+                status_code=504, detail="Request timeout during processing."
+            )
+        try:
+            serialized_results = await asyncio.wait_for(
+                self._serialize_result_tuple(result_data_tuple),
+                timeout=PROCESS_TIMEOUT_SEC,
+            )
+        except asyncio.TimeoutError:
+            raise HTTPException(
+                status_code=504, detail="Request timeout during serialization."
+            )
+
         return serialized_results
 
     async def _run_algorithm(self, **algo_params):

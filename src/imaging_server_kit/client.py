@@ -1,5 +1,4 @@
 import requests
-import webbrowser
 from typing import List, Dict, Tuple
 import numpy as np
 import imaging_server_kit as serverkit
@@ -30,12 +29,12 @@ class Client:
             raise ServerRequestError(endpoint, e)
 
         if response.status_code == 200:
-            services = response.json().get("services")
-            self.algorithms = services
+            self.algorithms = response.json().get("services")
         else:
             raise AlgorithmServerError(response.status_code, response.text)
         
     # def browser_login(self):
+    #     import webbrowser
     #     webbrowser.open(f"{self.server_url}/login")
     #     # How to retreive the access_token when the user logs in via the web page?
     #     # self.token = [...]

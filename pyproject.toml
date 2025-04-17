@@ -39,6 +39,7 @@ dependencies = [
     "dash-bootstrap-components",  # For the dash app
     "a2wsgi",  # For the dash app
     "pytest",  # For testing
+    "pydantic>=2.0"
 ]
 
 [project.urls]
