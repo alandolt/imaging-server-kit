@@ -10,16 +10,19 @@ import requests
 import yaml
 from a2wsgi import WSGIMiddleware
 from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.responses import HTMLResponse
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from imaging_server_kit.web_demo import generate_dash_app
 from pydantic import BaseModel, ConfigDict
 
 templates_dir = Path(
-    importlib.resources.files("imaging_server_kit").joinpath("templates")
+    importlib.resources.files("imaging_server_kit.core").joinpath("templates")
 )
-static_dir = Path(importlib.resources.files("imaging_server_kit").joinpath("static"))
+static_dir = Path(
+    importlib.resources.files("imaging_server_kit.core").joinpath("static")
+)
 templates = Jinja2Templates(directory=str(templates_dir))
 
 PROCESS_TIMEOUT_SEC = 3600  # Client timeout for the /process route
@@ -54,12 +57,51 @@ class AlgorithmServer:
         algorithm_name: str,
         parameters_model: Type[BaseModel],
         metadata_file: str = "metadata.yaml",
+        title: str="Image Processing Algorithm",
+        description: str="Implementation of an image processing algorithm.",
+        tags: List[str]=[],
+        used_for: List[str]=[],
+        project_url: str="https://github.com/Imaging-Server-Kit/imaging-server-kit",
+        serverkit_repo_url:str="https://github.com/Imaging-Server-Kit/imaging-server-kit",
     ):
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
-        self.metadata_file = metadata_file
+
+        if metadata_file is not None:
+            if Path(metadata_file).exists():
+                self.algo_info = load_from_yaml(metadata_file)
+        else:
+            self.algo_info = {
+                "project_slug": algorithm_name,
+                "project_url": project_url,
+                "serverkit_repo_url": serverkit_repo_url,
+                "project_name": title,
+                "description": description,
+                "used_for": used_for,
+                "tags": tags,
+            }
 
         self.app = FastAPI(title=algorithm_name, lifespan=self.lifespan)
+
+        # Centralized exception handlers
+        @self.app.exception_handler(RequestValidationError)
+        async def validation_exception_handler(
+            request: Request, exc: RequestValidationError
+        ):
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"error_type": "validation_error", "detail": exc.errors()},
+            )
+
+        @self.app.exception_handler(Exception)
+        async def generic_exception_handler(request: Request, exc: Exception):
+            # Let FastAPI handle HTTPExceptions
+            if isinstance(exc, HTTPException):
+                raise exc
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"error_type": "internal_server_error", "message": str(exc)},
+            )
 
         # Info HTML
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
@@ -115,49 +157,89 @@ class AlgorithmServer:
             print(f"Failed to deregister {self.algorithm_name}: {response.json()}")
 
     def register_routes(self):
-        @self.app.get("/")
+        @self.app.get(
+            "/",
+            summary="Home or info page",
+            description="Serve the algorithm info page (as home page).",
+            tags=["meta"],
+        )
         def home(request: Request):
-            if Path(self.metadata_file).exists():
-                return info(request)
-            else:
-                return list_services()
+            return info(request)
 
-        @self.app.get("/services")
+        @self.app.get(
+            "/services",
+            response_model=dict,
+            summary="List services",
+            description="Return the list of available algorithm services.",
+            tags=["meta"],
+        )
         def list_services():
+            """List available algorithm services."""
             return {"services": self.services}
 
-        @self.app.get("/version")
+        @self.app.get(
+            "/version",
+            response_model=str,
+            summary="Get server version",
+            description="Return the version of the Imaging Server Kit.",
+            tags=["meta"],
+        )
         def get_version():
+            """Get the package version."""
             return serverkit.__version__
 
-        @self.app.get(f"/{self.algorithm_name}/info", response_class=HTMLResponse)
+        @self.app.get(
+            f"/{self.algorithm_name}/info",
+            response_class=HTMLResponse,
+            summary="Algorithm info",
+            description="Render the HTML info page for this algorithm.",
+            tags=["algorithm", "meta"],
+        )
         def info(request: Request):
-            algo_info = load_from_yaml(self.metadata_file)
             algo_params_schema = get_algo_params()
             algo_params = parse_algo_params_schema(algo_params_schema)
             return templates.TemplateResponse(
                 "info.html",
                 {
                     "request": request,
-                    "algo_info": algo_info,
+                    "algo_info": self.algo_info,
                     "algo_params": algo_params,
                 },
             )
 
         @self.app.post(
-            f"/{self.algorithm_name}/process", status_code=status.HTTP_201_CREATED
+            f"/{self.algorithm_name}/process",
+            status_code=status.HTTP_201_CREATED,
+            summary="Run algorithm",
+            description="Execute the algorithm with the provided parameters and return the serialized results.",
+            tags=["algorithm"],
         )
         async def run_algo(
             algo_params: self.parameters_model,
         ):
+            """Run the algorithm processing endpoint."""
             return await self._run_algo_logic(algo_params)
 
-        @self.app.get(f"/{self.algorithm_name}/parameters", response_model=dict)
+        @self.app.get(
+            f"/{self.algorithm_name}/parameters",
+            response_model=dict,
+            summary="Get parameter schema",
+            description="Return the JSON schema for this algorithm's parameters.",
+            tags=["algorithm"],
+        )
         def get_algo_params():
+            """Get the parameter JSON schema."""
             return self.parameters_model.model_json_schema()
 
-        @self.app.get(f"/{self.algorithm_name}/sample_images", response_model=dict)
+        @self.app.get(
+            f"/{self.algorithm_name}/sample_images",
+            response_model=dict,
+            summary="Get sample images",
+            description="Return a list of encoded sample images for this algorithm.",
+            tags=["algorithm"],
+        )
         def get_sample_images():
+            """Fetch and encode sample images."""
             images = self.load_sample_images()
             encoded_images = [
                 {"sample_image": serverkit.encode_contents(image)} for image in images
@@ -173,7 +255,9 @@ class AlgorithmServer:
     async def _run_algo_logic(self, algo_params):
         try:
             result_data_tuple = await asyncio.wait_for(
-                self._run_algorithm(**algo_params.dict()),
+                self._run_algorithm(
+                    **algo_params.dict()
+                ),  # TODO: Pydantic warns: ` The `dict` method is deprecated; use `model_dump` instead.`
                 timeout=PROCESS_TIMEOUT_SEC,
             )
         except asyncio.TimeoutError:  # TODO: This doesn't kill the thread...

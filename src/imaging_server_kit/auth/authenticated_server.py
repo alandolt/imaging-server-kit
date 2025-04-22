@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 
 from imaging_server_kit import AlgorithmServer
 
-from imaging_server_kit.users_utils import (
+from .utils import (
     create_db_and_tables,
     fastapi_users,
     auth_backend,
@@ -21,10 +21,9 @@ from imaging_server_kit.users_utils import (
     current_active_user,
 )
 
-templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
-
+static_dir = importlib.resources.files("imaging_server_kit.auth").joinpath("static")
+templates_dir = importlib.resources.files("imaging_server_kit.auth").joinpath("templates")
 templates = Jinja2Templates(directory=str(templates_dir))
-
 
 class AuthenticatedAlgorithmServer(AlgorithmServer):
     def __init__(
@@ -64,6 +63,7 @@ class AuthenticatedAlgorithmServer(AlgorithmServer):
     @asynccontextmanager
     async def lifespan(self, app: FastAPI):
         await self.register_with_algohub()  # TODO: this is weirdly overwritten. Is there a better way of handling this lifespan?
+        create_db_and_tables()
         yield
         await self.deregister_from_algohub()
 

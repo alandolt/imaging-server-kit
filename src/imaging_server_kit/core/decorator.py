@@ -2,8 +2,13 @@ from functools import partial
 from typing import Callable, List
 
 import skimage.io
-from imaging_server_kit import AlgorithmServer, decode_contents
-from pydantic import BaseModel, Field, create_model, field_validator
+from pydantic import BaseModel, Field, create_model, field_validator, ConfigDict
+from .server import AlgorithmServer
+from .encoding import decode_contents
+
+
+class BaseParamsModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
 
 
 def decode_image_array(cls, v, dimensionality) -> "np.ndarray":
@@ -27,6 +32,7 @@ def parse_params(parameters: dict) -> BaseModel:
             field_constraints["le"] = param_details.max
         if hasattr(param_details, "default"):
             field_constraints["default"] = param_details.default
+            field_constraints["example"] = param_details.default
         if hasattr(param_details, "title"):
             field_constraints["title"] = param_details.title
         if hasattr(param_details, "description"):
@@ -42,25 +48,47 @@ def parse_params(parameters: dict) -> BaseModel:
             validated_func = partial(
                 decode_image_array, dimensionality=param_details.dimensionality
             )
-            validators["image_validator"] = field_validator("image", mode="after")(
+            validator_name = f"validate_{param_name}_image"
+            validators[validator_name] = field_validator(param_name, mode="after")(
                 validated_func
             )
 
         fields[param_name] = (param_details.type, Field(**field_constraints))
 
-    return create_model("Parameters", **fields, __validators__=validators)
+    return create_model(
+        "Parameters",
+        __base__=BaseParamsModel,
+        __validators__=validators,
+        **fields,
+    )
 
 
 class CustomAlgorithmServer(AlgorithmServer):
     def __init__(
         self,
         algorithm_name,
+        title,
+        description,
+        used_for,
+        tags,
+        project_url,
+        serverkit_repo_url,
         parameters_model,
         metadata_file,
         func: Callable,
         sample_images: List,
     ):
-        super().__init__(algorithm_name, parameters_model, metadata_file)
+        super().__init__(
+            algorithm_name=algorithm_name,
+            parameters_model=parameters_model,
+            metadata_file=metadata_file,
+            title=title,
+            description=description,
+            tags=tags,
+            used_for=used_for,
+            project_url=project_url,
+            serverkit_repo_url=serverkit_repo_url,
+        )
         self.func = func
         self.sample_images = sample_images
 
@@ -73,6 +101,12 @@ class CustomAlgorithmServer(AlgorithmServer):
 
 def algorithm_server(
     algorithm_name="algorithm",
+    title="Image Processing Algorithm",
+    description="Implementation of an image processing algorithm.",
+    used_for=[],
+    tags=[],
+    project_url="https://github.com/Imaging-Server-Kit/imaging-server-kit",
+    serverkit_repo_url="https://github.com/Imaging-Server-Kit/imaging-server-kit",
     parameters=None,
     sample_images=[],
     metadata_file: str = None,
@@ -80,6 +114,12 @@ def algorithm_server(
     def wrapper(func: Callable):
         algo_server = CustomAlgorithmServer(
             algorithm_name=algorithm_name,
+            title=title,
+            description=description,
+            used_for=used_for,
+            tags=tags,
+            project_url=project_url,
+            serverkit_repo_url=serverkit_repo_url,
             parameters_model=parse_params(parameters),
             metadata_file=metadata_file,
             func=func,

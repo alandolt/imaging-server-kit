@@ -10,7 +10,7 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
 
-from imaging_server_kit.users_utils.db import User, get_user_db
+from .db import User, get_user_db
 
 SECRET = "SECRET"
 

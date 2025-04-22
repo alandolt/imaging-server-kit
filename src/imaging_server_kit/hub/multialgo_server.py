@@ -5,15 +5,18 @@ from fastapi import FastAPI, Request, status, HTTPException, Path
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 import importlib.resources
 from contextlib import asynccontextmanager
 import asyncio
-from imaging_server_kit import AlgorithmServer
 import imaging_server_kit as serverkit
-from pydantic import ValidationError
+from imaging_server_kit import AlgorithmServer
+from imaging_server_kit.core import parse_algo_params_schema
 
-templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
-static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
+templates_dir = importlib.resources.files("imaging_server_kit.core").joinpath("templates")
+static_dir = importlib.resources.files("imaging_server_kit.core").joinpath("static")
 
 templates = Jinja2Templates(directory=str(templates_dir))
 
@@ -21,13 +24,28 @@ ALGORITHM_HUB_URL = os.getenv("ALGORITHM_HUB_URL", "http://algorithm_hub:8000")
 PROCESS_TIMEOUT_SEC = 3600  # Client timeout for the /process route
 
 
-from imaging_server_kit.server import load_from_yaml, parse_algo_params_schema
-
-
 class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
     def __init__(self, server_name: str, algorithm_servers: List[AlgorithmServer]):
         self.server_name = server_name
         self.app = FastAPI(title=server_name, lifespan=self.lifespan)
+
+        # Centralized exception handlers
+        @self.app.exception_handler(RequestValidationError)
+        async def validation_exception_handler(request: Request, exc: RequestValidationError):
+            return JSONResponse(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                content={"error_type": "validation_error", "detail": exc.errors()},
+            )
+
+        @self.app.exception_handler(Exception)
+        async def generic_exception_handler(request: Request, exc: Exception):
+            from fastapi import HTTPException
+            if isinstance(exc, HTTPException):
+                raise exc
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content={"error_type": "internal_server_error", "message": str(exc)},
+            )
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
         self.services = [server_name]
 
@@ -37,7 +55,7 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
                 "load_funct": server.load_sample_images,
                 "run_funct": server.run_algorithm,
                 "parameters_model": server.parameters_model,
-                "metadata_file": server.metadata_file,
+                "algo_info": server.algo_info,
             }
 
         self.register_routes()
@@ -100,8 +118,10 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
             algorithm_name: str = Path(...),
             request: Request = ...,
         ):
-            metadata_file = self.algorithms.get(algorithm_name, {}).get("metadata_file")
-            algo_info = load_from_yaml(metadata_file)
+            if algorithm_name not in self.algorithms:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                    detail=f"Algorithm {algorithm_name} not found")
+            algo_info = self.algorithms[algorithm_name].get("algo_info")
             algo_params_schema = get_algo_params(algorithm_name)
             algo_params = parse_algo_params_schema(algo_params_schema)
             return templates.TemplateResponse(
@@ -121,6 +141,9 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
             algorithm_name: str = Path(...),
             request: Request = ...,
         ):
+            if algorithm_name not in self.algorithms:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                    detail=f"Algorithm {algorithm_name} not found")
 
             parameters_model = self.algorithms.get(algorithm_name, {}).get(
                 "parameters_model"
@@ -141,10 +164,16 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
 
         @self.app.get("/{algorithm_name}/parameters", response_model=dict)
         def get_algo_params(algorithm_name):
+            if algorithm_name not in self.algorithms:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                    detail=f"Algorithm {algorithm_name} not found")
             return self.get_algorithm_params(algorithm_name)
 
         @self.app.get("/{algorithm_name}/sample_images", response_model=dict)
         def get_sample_images(algorithm_name):
+            if algorithm_name not in self.algorithms:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                    detail=f"Algorithm {algorithm_name} not found")
             return self.get_algorithm_sample_images(algorithm_name)
 
     async def _serialize_result_tuple(self, result_data_tuple):

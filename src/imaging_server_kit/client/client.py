@@ -2,7 +2,7 @@ import requests
 from typing import List, Dict, Tuple
 import numpy as np
 import imaging_server_kit as serverkit
-from imaging_server_kit.errors import (
+from imaging_server_kit.core import (
     AlgorithmNotFoundError,
     AlgorithmServerError,
     InvalidAlgorithmParametersError,

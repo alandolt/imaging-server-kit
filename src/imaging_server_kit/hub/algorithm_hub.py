@@ -5,8 +5,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import importlib.resources
 
-templates_dir = importlib.resources.files("imaging_server_kit").joinpath("templates")
-static_dir = importlib.resources.files("imaging_server_kit").joinpath("static")
+templates_dir = importlib.resources.files("imaging_server_kit.core").joinpath("templates")
+static_dir = importlib.resources.files("imaging_server_kit.core").joinpath("static")
 
 templates = Jinja2Templates(directory=str(templates_dir))
 
