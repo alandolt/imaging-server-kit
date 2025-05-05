@@ -10,7 +10,7 @@ from imaging_server_kit import algorithm_server, ImageUI, DropDownUI
     title="Automatic Threshold",
     description="Implementation of an automatic threshold algorithm.",
     used_for=["Segmentation"],
-    tags=["Scikit-image", "EPFL"],
+    tags=["Scikit-image", "Demo"],
     parameters={
         "image": ImageUI(),
         "method": DropDownUI(

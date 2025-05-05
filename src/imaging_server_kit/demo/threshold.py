@@ -10,7 +10,7 @@ from skimage.util import img_as_float
     title="Binary Threshold",
     description="Implementation of a binary threshold algorithm.",
     used_for=["Segmentation"],
-    tags=["EPFL"],
+    tags=["Demo"],
     parameters={
         "image": ImageUI(),
         "threshold": FloatSpinBoxUI(

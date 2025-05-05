@@ -1,6 +1,6 @@
 """
 Algorithm server definition.
-Documentation: [TODO]
+Documentation: https://imaging-server-kit.github.io/imaging-server-kit/
 """
 from typing import List
 from pathlib import Path

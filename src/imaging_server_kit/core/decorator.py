@@ -110,12 +110,21 @@ def algorithm_server(
     used_for=[],
     tags=[],
     project_url="https://github.com/Imaging-Server-Kit/imaging-server-kit",
-    serverkit_repo_url="https://github.com/Imaging-Server-Kit/imaging-server-kit",
     sample_images=[],
     metadata_file: str = None,
+    serverkit_repo_url="https://github.com/Imaging-Server-Kit/imaging-server-kit",
 ):
     """
-    TODO: Add a docstring
+    This decorator wraps a function and converts it to an algorithm server.
+    Args:
+        parameters: A dictionary defining the parameters for the algorithm.
+        algorithm_name: The name of the algorithm, in URL-friendly format (no spaces or special characters).
+        title: A title or display name for the algorithm. Used in the /info page.
+        description: A description of the algorithm. Used in the /info page.
+        used_for: A list of tags from: `Segmentation`, `Registration`, `Filtering`, `Tracking`, `Restoration`, `Points detection`, `Box detection`.
+        tags: Tags used to categorize the algorithm server, for example `Deep learning`, `EPFL`, `Cell biology`, `Digital pathology`.
+        project_url: A URL to the project homepage.
+        sample_images: A list of paths to sample images for the algorithm.
     """
     def wrapper(func: Callable):
         algo_server = CustomAlgorithmServer(
