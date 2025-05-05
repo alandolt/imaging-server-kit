@@ -1,10 +1,9 @@
 import uvicorn
-import imaging_server_kit as serverkit
+from imaging_server_kit.core import Parameters, AlgorithmServer
 
-server = serverkit.AlgorithmServer(
-    algorithm_name="foo", parameters_model=serverkit.Parameters
+server = AlgorithmServer(
+    algorithm_name="foo", parameters_model=Parameters
 )
-app = server.app
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000)
+    uvicorn.run(server.app, host="0.0.0.0", port=8000)
