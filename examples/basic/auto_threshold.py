@@ -12,11 +12,7 @@ from imaging_server_kit import algorithm_server, ImageUI, DropDownUI
     used_for=["Segmentation"],
     tags=["Scikit-image", "EPFL"],
     parameters={
-        "image": ImageUI(
-            title="Image",
-            description="Input image (2D, 3D)",
-            dimensionality=[2, 3],
-        ),
+        "image": ImageUI(),
         "method": DropDownUI(
             default="otsu",
             title="Method",
@@ -26,7 +22,7 @@ from imaging_server_kit import algorithm_server, ImageUI, DropDownUI
     },
     sample_images=[str(Path(__file__).parent / "sample_images" / "blobs.tif")],
 )
-def serve_auto_threshold(
+def auto_threshold_algo_server(
     image: np.ndarray,
     method: str,
 ):
@@ -39,4 +35,4 @@ def serve_auto_threshold(
 
 
 if __name__ == "__main__":
-    uvicorn.run(serve_auto_threshold.app, host="0.0.0.0", port=8000)
+    uvicorn.run(auto_threshold_algo_server.app, host="0.0.0.0", port=8000)
