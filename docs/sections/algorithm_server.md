@@ -6,10 +6,10 @@ In this tutorial, we'll re-implement the `serverkit demo` example of an intensit
 
 Implementing an algorithm server with the `imaging-server-kit` involves two main steps:
 
-- Wrapping the image processing logic as a Python function returning a `list of data tuples`
+- Wrapping the image processing logic as a Python function that returns a **list of data tuples**
 - Decorating the function with `@algorithm_server`
 
-Let's consider the following Python function as an example:
+Let's consider this Python function as an example:
 
 ```python
 def threshold_algo_server(image: np.ndarray, threshold: float):
@@ -17,15 +17,15 @@ def threshold_algo_server(image: np.ndarray, threshold: float):
     return binary_mask
 ```
 
-This function implements a simple intensity threshold algorithm applied to an image represented as a Numpy array.
+This function applies an intensity threshold to an image represented as a Numpy array and returns it as a segmentation mask (also a Numpy array).
 
-To turn this function into to an algorithm server using the `imaging-server-kit`, we first need to **make the function return a list of data tuples**.
+To turn this function into to an algorithm server, we first need to modify the function to **make it return a list of data tuples**.
 
-## Step 1: Make the function return a list of data tuples
+## Make the function return a list of data tuples
 
-The function should return a list of tuples ("data tuples"), each tuple representing one distinct output of the algorithm.
+The function should return a list of tuples ("data tuples"). Each tuple represents one distinct output of the algorithm.
 
-Our threshold algorithm only has one output: the binary segmentation mask resulting from thresholding.
+Our threshold algorithm only has one output: the segmentation mask resulting from thresholding.
 
 ```python
 def threshold_algo_server(image: np.ndarray, threshold: float):
@@ -33,10 +33,10 @@ def threshold_algo_server(image: np.ndarray, threshold: float):
     return [(binary_mask, {}, "mask")]  # List of data tuples
 ```
 
-The data tuples follow a structure similar to Napari's [LayerDataTuple](https://napari.org/0.4.15/guides/magicgui.html?highlight=layerdatatuple) model. They include three elements:
+The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0.4.15/guides/magicgui.html?highlight=layerdatatuple) model. They include three elements:
 
-- The *first element* is the data, usually in the form of a Numpy array. The shape and interpretation of the array axes varies based on what the output represents (see table below).
-- The *second element* is the metadata associated with the output, represented as a Python dictionary. It can be empty (`{}`). These metadata are used to affect how the output is displayed in client apps (For details, see [Metadata fields]()).
+- The *first element* is the **data**, usually in the form of a Numpy array. The shape and interpretation of the axes depends on what the output represents (cf. table below).
+- The *second element* is optional **metadata** associated with the output, represented as a Python dictionary. It can be empty (`{}`). These metadata are used to affect how the output is displayed in client apps.
 - The *third element* is the output type: a string identifying what the output represents.
 
 | Output type       | Description                                                                                           |
@@ -51,29 +51,30 @@ The data tuples follow a structure similar to Napari's [LayerDataTuple](https://
 | `"class"`         | A class label (for image classification).                                                             |
 | `"text"`          | A string of text (for example, for image captioning).                                                 |
 
-Functions can return an arbitrary number of outputs. In this case, the return type will follow the pattern:
+The function can return an arbitrary number of outputs, following the pattern:
 
 ```
 # Body of the function
 return [
     (data1, {metadata1}, "type1"),  # First output
     (data2, {metadata2}, "type2"),  # Second output
+    (...)
 ]
 ```
 
 ```{admonition} Are there any other constraints on the Python function?
-The function parameters can only be **numpy arrays**, **numerics** (`int`, `float`), **booleans** or **strings**.
+The function parameters can only be **numpy arrays**, **numeric values** (`int`, `float`), **booleans** or **strings**.
 ```
 
-## Step 2: Decorate the function with `@algorithm_server`
+## Decorate the function with `@algorithm_server`
 
 This serves several purposes:
 
-- It converts the python function to a FastAPI server with predefined routes (see [API Endpoints]()).
-- It clearly defines algorithm parameters that can be validated.
-- Optional metadata about the algorithm server can be added to populate its `info` page.
+- It converts the python function to a FastAPI server with predefined routes (cf. [API Endpoints](api_endpoints)).
+- It enables the server to validate algorithm parameters when receiving requests.
+- Optional info about the algorithm server can be added to populate its `info` page.
 
-Here is our decorated threshold algorithm function:
+Below is our decorated threshold algorithm function:
 
 ```python
 from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
@@ -90,7 +91,7 @@ from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
             title="Threshold",
             description="Intensity threshold.",
         ),
-    }
+    },
 )
 def threshold_algo_server(image: np.ndarray, threshold: float):
     binary_mask = image > threshold
@@ -101,11 +102,11 @@ if __name__ == "__main__":
     uvicorn.run(threshold_algo_server.app, host="0.0.0.0", port=8000)
 ```
 
-This is enough to achieve our desired functionality. You can check that running this file as a script will spin up a threshold algorithm server that you can connect to from Napari, QuPath, or Python like in the [Getting started]() guide.
+You can check that running this file as a script will spin up a threshold algorithm server that you can connect to from Napari, QuPath, or Python, just like in the [Getting started](getting_started) guide.
 
-Most importantly, we have specified the `parameters` of the algorithm inside `@algorithm_server`. This is what enables parameters to be validated by the server before processing. Upon receiving requests with invalid algorithm parameters, the server replies with a `403` error.
+Most importantly, we have specified the `parameters` field of `@algorithm_server`. This enables parameters to be validated by the server before processing. Upon receiving requests with invalid algorithm parameters, the server will reply with a `403` error and an informative message is displayed to the user.
 
-The keys of the `parameters` dictionary should match the parameters of the Python function (in our example: `image` and `threshold`). The values are *parameter UI* elements imported from the `imaging-server-kit.ui_library` module. There is a UI element for each supported class of parameters:
+The keys of the `parameters` dictionary should match the parameters of the Python function (in our example: `image` and `threshold`). The values are *parameter UI* elements. There is a UI element for each kind of parameters:
 
 | UI element           | Use case                                                                                                                         |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -121,9 +122,9 @@ The keys of the `parameters` dictionary should match the parameters of the Pytho
 | `ShapesUI`           | Shapes parameter.                                                                                                                |
 | `TracksUI`           | Tracks parameter.                                                                                                                |
 
-In our example, the input image array is well-represented by the `ImageUI` element, and the threshold parameter as a `FloatSpinBoxUI`. These UI elements themselves enable to describe what the parameter defaults and limits (min, max, step) are, as well as to specify a title and description for the parameter. This information is used to document the algorithm server; for example, they appear on the algorithm's `info/` page.
+In our example, the input image array is well-represented by the `ImageUI` element, and the threshold parameter as a `FloatSpinBoxUI`. The parameter defaults and limits (min, max, step) are specified, as well as a title and description of the parameter, which will appear on the algorithm's `info` page.
 
-In addition to `parameters`, the `@algorithm_server` decorator accepts a variety of optional parameters to enable extra functionalities, such as downloading a sample image, linking to a project page, and providing information on the intended usage of the algorithm server. For details, print `help(algorithm_server)` or take a look at the complete [demo example](). The available fields are:
+Moreover, the `@algorithm_server` decorator accepts a variety of optional parameters to enable downloading a sample image, linking to a project page, and providing information on the intended usage of the algorithm server. For details, take a look at the complete [demo example](https://github.com/Imaging-Server-Kit/imaging-server-kit/blob/main/src/imaging_server_kit/demo/threshold.py). The available fields include:
 
 | Key              | Description                                                                                                                      |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
@@ -137,9 +138,9 @@ In addition to `parameters`, the `@algorithm_server` decorator accepts a variety
 
 If you provide sample images, the license terms under which the images are distributed should be respected. For example, for images under [CC-BY](https://creativecommons.org/licenses/by/2.0/deed.en) license, proper attribution should be included.
 
-## Algorithm Server Template
+## Starting from a template
 
-You can quickly create a new algorithm server project, starting from a template. Run the command (specify an output directory):
+It is also possible to create a new algorithm server from a template. Specify an output directory and run the command:
 
 ```
 serverkit new <output_directory>

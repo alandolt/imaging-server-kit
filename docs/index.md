@@ -3,7 +3,7 @@
 The **Imaging Server Kit** is an open-source Python package for deploying image analysis algorithms as web services.
 
 - Run computations remotely, while client applications remain focused on visualization.
-- Connect to an algorithm server and run algorithms from [QuPath](https://github.com/Imaging-Server-Kit/qupath-extension-serverkit), [Napari](https://github.com/Imaging-Server-Kit/napari-serverkit), and [Python]().
+- Connect to an algorithm server and run algorithms from [QuPath](https://github.com/Imaging-Server-Kit/qupath-extension-serverkit), [Napari](https://github.com/Imaging-Server-Kit/napari-serverkit), and Python.
 
 ## Key Features
 
@@ -31,7 +31,7 @@ def segmentation_server(image):
 | Image-to-Text   | [Image captioning](https://github.com/Imaging-Server-Kit/serverkit-blip-captioning)         | ✅ |  |
 | Classification   | [ResNet50](https://github.com/Imaging-Server-Kit/serverkit-resnet50)         | ✅ |  |
 
-A gallery of example implementations for commonly used algorithms is available in the [repository]().
+A gallery of example implementations for commonly used algorithms is available in the [repository](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples).
 
 ## Installation
 

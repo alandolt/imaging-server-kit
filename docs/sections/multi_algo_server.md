@@ -1,6 +1,6 @@
 # Multi-algorithm server
 
-Multiple algorithms can be combined into one server using the `MultiAlgorithmServer` class. Take a look at the example below from the [algorithm server examples]().
+Multiple algorithms can be combined into one server using the `MultiAlgorithmServer` class. Take a look at the example below from the [algorithm server examples](https://github.com/Imaging-Server-Kit/imaging-server-kit/blob/main/examples/basic/multi_algo.py).
 
 ```python
 from imaging_server_kit import MultiAlgorithmServer
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     uvicorn.run(server.app, host="0.0.0.0", port=8000)
 ```
 
-Any number of algorithms can be combined into one server. When a multi-algorithm server is running, it provides a list of available algorithms under the `/services` route. The code below shows how to interact with a multi-algorithm server from Python:
+When a multi-algorithm server is running, it provides a list of available algorithms under the `/services` route. The code below shows how to interact with a multi-algorithm server from Python:
 
 ```python
 from imaging_server_kit import Client
@@ -35,6 +35,6 @@ In Napari, the available algorithms can be selected from the `algorithms` dropdo
 
 ```{note}
 When using `MultiAlgorithmServer`, all of the algorithms are installed in a single Python environment.
-If this is an issue, for example in case of conflicting dependencies, it is also possible to isolate algorithm servers in their own Docker container (see [Using Docker]()).
+If this is an issue, it's also possible to isolate algorithm servers in Docker containers (see [Using Docker](docker)).
 ```
 

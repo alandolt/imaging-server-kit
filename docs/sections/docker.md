@@ -4,7 +4,7 @@ The Imaging Server Kit provides an **algorithm hub** to serve multiple algorithm
 
 To set up an algorithm hub, the easiest is to use a `docker-compose.yml` file.
 
-Here is the [example from the respository]():
+Here is the [example from the respository](https://github.com/Imaging-Server-Kit/imaging-server-kit/blob/main/examples/servers/docker-compose.yml):
 
 ```
 services:
@@ -35,4 +35,4 @@ Start the algorithm hub server with
 docker compose up
 ```
 
-The server will be listening on http://localhost:8000. It behaves exactly like a [Multi-algorithm server](), however each algorithm runs in a separate docker container.
+The server will be listening on http://localhost:8000. It behaves exactly like a [Multi-algorithm server](multi_algo_server), however each algorithm runs in a separate docker container.
