@@ -51,7 +51,7 @@ a:hover {
 
 .cards {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-gap: 16px;
 }
 
@@ -75,13 +75,13 @@ a:hover {
 
 @media (min-width: 992px) {
     .cards {
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
     }
 }
 
 @media (min-width: 1200px) {
     .cards {
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
     }
 }
 

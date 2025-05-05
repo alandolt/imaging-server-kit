@@ -28,7 +28,6 @@ A documentation of the endpoints is automatically generated at http://localhost:
 - http://localhost:8000/ : Running algorithm message.
 - http://localhost:8000/version: Version of the `imaging-server-kit` package.
 - http://localhost:8000/orientationpy/info: Web page displaying project metadata.
-- http://localhost:8000/orientationpy/demo: Plotly Dash web demo app.
 - http://localhost:8000/orientationpy/parameters: Json Schema representation of algorithm parameters.
 - http://localhost:8000/orientationpy/sample_images: Byte string representation of the sample images.
 

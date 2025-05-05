@@ -36,9 +36,6 @@ dependencies = [
     "geojson",
     "jinja2",                         # For the /info route
     "pyyaml",                         # For the /info route
-    "dash",                           # For the dash app
-    "dash-bootstrap-components",      # For the dash app
-    "a2wsgi",                         # For the dash app
     "pytest",                         # For testing
     "pydantic>=2.0",
     "cookiecutter",

@@ -7,17 +7,14 @@ from typing import List, Tuple, Type
 
 import numpy as np
 
-# import imaging_server_kit as serverkit
 import requests
 import yaml
-from a2wsgi import WSGIMiddleware
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from imaging_server_kit._version import __version__
-from imaging_server_kit.web_demo import generate_dash_app
 from imaging_server_kit.core.encoding import encode_contents
 from imaging_server_kit.core.serialization import serialize_result_tuple
 from pydantic import BaseModel, ConfigDict
@@ -110,19 +107,6 @@ class AlgorithmServer:
 
         # Info HTML
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
-
-        # Web demo app
-        algo_params = parameters_model.model_json_schema().get("properties")
-
-        dash_app = generate_dash_app(
-            algorithm_name,
-            algo_params,
-            run_fnct=self.run_algorithm,
-            sample_image_fnct=self.load_sample_images,
-            prefix=f"/{algorithm_name}/demo/",
-        )
-
-        self.app.mount(f"/{algorithm_name}/demo", WSGIMiddleware(dash_app.server))
 
         self.register_routes()
 

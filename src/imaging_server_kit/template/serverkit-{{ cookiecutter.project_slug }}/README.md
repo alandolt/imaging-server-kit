@@ -28,7 +28,6 @@ A documentation of the endpoints is automatically generated at http://localhost:
 - http://localhost:8000/ : Running algorithm message.
 - http://localhost:8000/version : Version of the `imaging-server-kit` package.
 - http://localhost:8000/{{ cookiecutter.project_slug }}/info : Web page displaying project metadata.
-- http://localhost:8000/{{ cookiecutter.project_slug }}/demo : Plotly Dash web demo app.
 - http://localhost:8000/{{ cookiecutter.project_slug }}/parameters : Json Schema representation of algorithm parameters.
 - http://localhost:8000/{{ cookiecutter.project_slug }}/sample_images : Byte string representation of the sample images.
 

@@ -69,11 +69,6 @@ class AlgorithmHub:
             response = requests.get(f"{algo_url}/{algorithm}/info")
             return HTMLResponse(content=response.text, status_code=response.status_code)
 
-        # @self.app.get("/{algorithm}/demo", response_class=HTMLResponse)
-        # async def get_algorithm_demo(request: Request, algorithm: str):
-        #     response = requests.get(f"{self.services.get(algorithm)}/demo")
-        #     return HTMLResponse(content=response.text, status_code=response.status_code)
-
         @self.app.get("/{algorithm}/")
         async def get_algorithm(request: Request, algorithm: str):
             algo_url = self.services.get(algorithm)
