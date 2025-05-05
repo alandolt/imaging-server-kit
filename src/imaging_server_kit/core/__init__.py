@@ -2,7 +2,7 @@
 Core implementations for the Imaging Server Kit.
 """
 
-from .decorator import algorithm_server
+from .decorator import algorithm_server, parse_params
 from .encoding import encode_contents, decode_contents
 from .errors import (
     AlgorithmNotFoundError,
@@ -37,7 +37,7 @@ from .server import (
     PROCESS_TIMEOUT_SEC,
 )
 from .ui_library import (
-    UIElement,
+    ParameterUI,
     DropDownUI,
     FloatSpinBoxUI,
     IntSpinBoxUI,
@@ -82,7 +82,7 @@ __all__ = [
     "parse_algo_params_schema",
     "ALGORITHM_HUB_URL",
     "PROCESS_TIMEOUT_SEC",
-    "UIElement",
+    "ParameterUI",
     "DropDownUI",
     "FloatSpinBoxUI",
     "IntSpinBoxUI",

@@ -9,7 +9,7 @@ from .client import Client
 from .core import (
     algorithm_server,
     AlgorithmServer,
-    UIElement,
+    ParameterUI,
     DropDownUI,
     FloatSpinBoxUI,
     IntSpinBoxUI,
@@ -21,8 +21,9 @@ from .core import (
     VectorsUI,
     ShapesUI,
     TracksUI,
-    serialize_result_tuple, 
+    serialize_result_tuple,
     deserialize_result_tuple,
+    parse_params,
 )
 from .auth import AuthenticatedAlgorithmServer
 from .hub import AlgorithmHub, MultiAlgorithmServer

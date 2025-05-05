@@ -1,13 +1,16 @@
 import requests
 from typing import List, Dict, Tuple
 import numpy as np
-import imaging_server_kit as serverkit
+
 from imaging_server_kit.core import (
     AlgorithmNotFoundError,
     AlgorithmServerError,
     InvalidAlgorithmParametersError,
     ServerRequestError,
     AlgorithmTimeoutError,
+    encode_contents,
+    decode_contents,
+    deserialize_result_tuple
 )
 
 
@@ -94,7 +97,7 @@ class Client:
             raise ServerRequestError(endpoint, e)
 
         if response.status_code == 201:
-            return serverkit.deserialize_result_tuple(response.json())
+            return deserialize_result_tuple(response.json())
         elif response.status_code == 422:
             raise InvalidAlgorithmParametersError(response.status_code, response.json())
         elif response.status_code == 504:
@@ -133,7 +136,7 @@ class Client:
             images = []
             for content in response.json().get("sample_images"):
                 encoded_image = content.get("sample_image")
-                image = serverkit.decode_contents(encoded_image)
+                image = decode_contents(encoded_image)
                 images.append(image)
                 if first_only:
                     return image
@@ -155,5 +158,5 @@ class Client:
     def _encode_numpy_parameters(self, algo_params: dict) -> dict:
         for param in algo_params:
             if isinstance(algo_params[param], np.ndarray):
-                algo_params[param] = serverkit.encode_contents(algo_params[param])
+                algo_params[param] = encode_contents(algo_params[param])
         return algo_params

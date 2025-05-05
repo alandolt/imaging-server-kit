@@ -5,7 +5,9 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Tuple, Type
 
-import imaging_server_kit as serverkit
+import numpy as np
+
+# import imaging_server_kit as serverkit
 import requests
 import yaml
 from a2wsgi import WSGIMiddleware
@@ -14,7 +16,10 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from imaging_server_kit._version import __version__
 from imaging_server_kit.web_demo import generate_dash_app
+from imaging_server_kit.core.encoding import encode_contents
+from imaging_server_kit.core.serialization import serialize_result_tuple
 from pydantic import BaseModel, ConfigDict
 
 templates_dir = Path(
@@ -54,15 +59,15 @@ class Parameters(BaseModel):
 class AlgorithmServer:
     def __init__(
         self,
-        algorithm_name: str,
-        parameters_model: Type[BaseModel],
+        parameters_model: Type[BaseModel] = Parameters,
+        algorithm_name: str = "algorithm",
         metadata_file: str = "metadata.yaml",
-        title: str="Image Processing Algorithm",
-        description: str="Implementation of an image processing algorithm.",
-        tags: List[str]=[],
-        used_for: List[str]=[],
-        project_url: str="https://github.com/Imaging-Server-Kit/imaging-server-kit",
-        serverkit_repo_url:str="https://github.com/Imaging-Server-Kit/imaging-server-kit",
+        title: str = "Image Processing Algorithm",
+        description: str = "Implementation of an image processing algorithm.",
+        tags: List[str] = [],
+        used_for: List[str] = [],
+        project_url: str = "https://github.com/Imaging-Server-Kit/imaging-server-kit",
+        serverkit_repo_url: str = "https://github.com/Imaging-Server-Kit/imaging-server-kit",
     ):
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
@@ -186,7 +191,7 @@ class AlgorithmServer:
         )
         def get_version():
             """Get the package version."""
-            return serverkit.__version__
+            return __version__
 
         @self.app.get(
             f"/{self.algorithm_name}/info",
@@ -242,13 +247,13 @@ class AlgorithmServer:
             """Fetch and encode sample images."""
             images = self.load_sample_images()
             encoded_images = [
-                {"sample_image": serverkit.encode_contents(image)} for image in images
+                {"sample_image": encode_contents(image)} for image in images
             ]
             return {"sample_images": encoded_images}
 
     async def _serialize_result_tuple(self, result_data_tuple):
         serialized_results = await asyncio.to_thread(
-            serverkit.serialize_result_tuple, result_data_tuple
+            serialize_result_tuple, result_data_tuple
         )
         return serialized_results
 

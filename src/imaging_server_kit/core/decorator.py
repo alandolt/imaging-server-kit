@@ -1,5 +1,6 @@
 from functools import partial
 from typing import Callable, List
+import numpy as np
 
 import skimage.io
 from pydantic import BaseModel, Field, create_model, field_validator, ConfigDict
@@ -23,37 +24,39 @@ def decode_image_array(cls, v, dimensionality) -> "np.ndarray":
 def parse_params(parameters: dict) -> BaseModel:
     fields = {}
     validators = {}
-    for param_name, param_details in parameters.items():
-        field_constraints = {"json_schema_extra": {}}
 
-        if hasattr(param_details, "min"):
-            field_constraints["ge"] = param_details.min
-        if hasattr(param_details, "max"):
-            field_constraints["le"] = param_details.max
-        if hasattr(param_details, "default"):
-            field_constraints["default"] = param_details.default
-            field_constraints["example"] = param_details.default
-        if hasattr(param_details, "title"):
-            field_constraints["title"] = param_details.title
-        if hasattr(param_details, "description"):
-            field_constraints["description"] = param_details.description
-        if hasattr(param_details, "step"):
-            field_constraints["json_schema_extra"]["step"] = param_details.step
+    if parameters is not None:
+        for param_name, param_details in parameters.items():
+            field_constraints = {"json_schema_extra": {}}
 
-        field_constraints["json_schema_extra"][
-            "widget_type"
-        ] = param_details.widget_type
+            if hasattr(param_details, "min"):
+                field_constraints["ge"] = param_details.min
+            if hasattr(param_details, "max"):
+                field_constraints["le"] = param_details.max
+            if hasattr(param_details, "default"):
+                field_constraints["default"] = param_details.default
+                field_constraints["example"] = param_details.default
+            if hasattr(param_details, "title"):
+                field_constraints["title"] = param_details.title
+            if hasattr(param_details, "description"):
+                field_constraints["description"] = param_details.description
+            if hasattr(param_details, "step"):
+                field_constraints["json_schema_extra"]["step"] = param_details.step
 
-        if param_details.widget_type == "image":
-            validated_func = partial(
-                decode_image_array, dimensionality=param_details.dimensionality
-            )
-            validator_name = f"validate_{param_name}_image"
-            validators[validator_name] = field_validator(param_name, mode="after")(
-                validated_func
-            )
+            field_constraints["json_schema_extra"][
+                "widget_type"
+            ] = param_details.widget_type
 
-        fields[param_name] = (param_details.type, Field(**field_constraints))
+            if param_details.widget_type == "image":
+                validated_func = partial(
+                    decode_image_array, dimensionality=param_details.dimensionality
+                )
+                validator_name = f"validate_{param_name}_image"
+                validators[validator_name] = field_validator(param_name, mode="after")(
+                    validated_func
+                )
+
+            fields[param_name] = (param_details.type, Field(**field_constraints))
 
     return create_model(
         "Parameters",
@@ -66,6 +69,7 @@ def parse_params(parameters: dict) -> BaseModel:
 class CustomAlgorithmServer(AlgorithmServer):
     def __init__(
         self,
+        parameters_model,
         algorithm_name,
         title,
         description,
@@ -73,14 +77,13 @@ class CustomAlgorithmServer(AlgorithmServer):
         tags,
         project_url,
         serverkit_repo_url,
-        parameters_model,
         metadata_file,
         func: Callable,
         sample_images: List,
     ):
         super().__init__(
-            algorithm_name=algorithm_name,
             parameters_model=parameters_model,
+            algorithm_name=algorithm_name,
             metadata_file=metadata_file,
             title=title,
             description=description,
@@ -100,6 +103,7 @@ class CustomAlgorithmServer(AlgorithmServer):
 
 
 def algorithm_server(
+    parameters=None,
     algorithm_name="algorithm",
     title="Image Processing Algorithm",
     description="Implementation of an image processing algorithm.",
@@ -107,12 +111,15 @@ def algorithm_server(
     tags=[],
     project_url="https://github.com/Imaging-Server-Kit/imaging-server-kit",
     serverkit_repo_url="https://github.com/Imaging-Server-Kit/imaging-server-kit",
-    parameters=None,
     sample_images=[],
     metadata_file: str = None,
 ):
+    """
+    TODO: Add a docstring
+    """
     def wrapper(func: Callable):
         algo_server = CustomAlgorithmServer(
+            parameters_model=parse_params(parameters),
             algorithm_name=algorithm_name,
             title=title,
             description=description,
@@ -120,7 +127,6 @@ def algorithm_server(
             tags=tags,
             project_url=project_url,
             serverkit_repo_url=serverkit_repo_url,
-            parameters_model=parse_params(parameters),
             metadata_file=metadata_file,
             func=func,
             sample_images=sample_images,

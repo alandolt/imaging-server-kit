@@ -1,6 +1,21 @@
 from typing import Dict, List, Tuple
 import numpy as np
-import imaging_server_kit as serverkit
+from imaging_server_kit.core.encoding import (
+    encode_contents,
+    decode_contents,
+)
+from imaging_server_kit.core.geometry import (
+    mask2features,
+    instance_mask2features,
+    points2features,
+    boxes2features,
+    vectors2features,
+    features2mask,
+    features2instance_mask,
+    features2points,
+    features2boxes,
+    features2vectors,
+)
 import base64
 
 
@@ -21,7 +36,7 @@ def is_base64_encoded(data: str) -> bool:
         return base64.b64encode(decoded_data).decode("utf-8") == data
     except Exception:
         return False
-    
+
 
 def decode_data_features(data_params):
     """
@@ -33,10 +48,10 @@ def decode_data_features(data_params):
         decoded_features = {}
         for key, val in encoded_features.items():
             if isinstance(val, str) and is_base64_encoded(val):
-                decoded_features[key] = serverkit.decode_contents(val)
+                decoded_features[key] = decode_contents(val)
             else:
                 decoded_features[key] = val
-        data_params['features'] = decoded_features
+        data_params["features"] = decoded_features
     return data_params
 
 
@@ -50,9 +65,7 @@ def encode_data_features(data_params):
         # For these data types, we can pass features as numpy array but they must be encoded
         encoded_features = {
             key: (
-                serverkit.encode_contents(val)
-                if isinstance(val, np.ndarray)
-                else val
+                encode_contents(val) if isinstance(val, np.ndarray) else val
             )
             for (key, val) in features.items()
         }
@@ -67,28 +80,28 @@ def serialize_result_tuple(result_data_tuple: List[Tuple]) -> List[Dict]:
         data_params = encode_data_features(data_params)
 
         if data_type == "image":
-            features = serverkit.encode_contents(data.astype(np.float32))
+            features = encode_contents(data.astype(np.float32))
         elif data_type == "mask":
             data = data.astype(np.uint16)
-            features = serverkit.mask2features(data)
-            data_params['image_shape'] = data.shape
+            features = mask2features(data)
+            data_params["image_shape"] = data.shape
         elif data_type == "instance_mask":
             data = data.astype(np.uint16)
-            features = serverkit.instance_mask2features(data)
-            data_params['image_shape'] = data.shape
+            features = instance_mask2features(data)
+            data_params["image_shape"] = data.shape
         elif data_type == "mask3d":
-            features = serverkit.encode_contents(data.astype(np.uint16))
+            features = encode_contents(data.astype(np.uint16))
         elif data_type == "points":
-            features = serverkit.points2features(data)
+            features = points2features(data)
         elif data_type == "points3d":
-            features = serverkit.encode_contents(data.astype(np.float32))
+            features = encode_contents(data.astype(np.float32))
         elif data_type == "boxes":
-            features = serverkit.boxes2features(data)
-            data_params['shape_type'] = 'rectangle'
+            features = boxes2features(data)
+            data_params["shape_type"] = "rectangle"
         elif data_type == "vectors":
-            features = serverkit.vectors2features(data)
+            features = vectors2features(data)
         elif data_type == "tracks":
-            features = serverkit.encode_contents(data.astype(np.float32))
+            features = encode_contents(data.astype(np.float32))
         elif data_type == "class":
             features = data  # A simple string
         elif data_type == "text":
@@ -96,7 +109,7 @@ def serialize_result_tuple(result_data_tuple: List[Tuple]) -> List[Dict]:
         else:
             print(f"Unknown data_type: {data_type}")
             features = None
-        
+
         serialized_results.append(
             {
                 "type": data_type,
@@ -119,25 +132,25 @@ def deserialize_result_tuple(serialized_results: List[Dict]) -> List[Tuple]:
         data_params = decode_data_features(data_params)
 
         if data_type == "image":
-            data = serverkit.decode_contents(features).astype(float)
+            data = decode_contents(features).astype(float)
         elif data_type == "mask":
-            image_shape = data_params.pop('image_shape')
-            data = serverkit.features2mask(features, image_shape)
+            image_shape = data_params.pop("image_shape")
+            data = features2mask(features, image_shape)
         elif data_type == "instance_mask":
-            image_shape = data_params.pop('image_shape')
-            data = serverkit.features2instance_mask(features, image_shape)
+            image_shape = data_params.pop("image_shape")
+            data = features2instance_mask(features, image_shape)
         elif data_type == "mask3d":
-            data = serverkit.decode_contents(features).astype(int)
+            data = decode_contents(features).astype(int)
         elif data_type == "points":
-            data = serverkit.features2points(features)
+            data = features2points(features)
         elif data_type == "points3d":
-            data = serverkit.decode_contents(features).astype(float)
+            data = decode_contents(features).astype(float)
         elif data_type == "boxes":
-            data = serverkit.features2boxes(features)
+            data = features2boxes(features)
         elif data_type == "vectors":
-            data = serverkit.features2vectors(features)
+            data = features2vectors(features)
         elif data_type == "tracks":
-            data = serverkit.decode_contents(features).astype(float)
+            data = decode_contents(features).astype(float)
         elif data_type == "class":
             data = features  # A simple string
         elif data_type == "text":

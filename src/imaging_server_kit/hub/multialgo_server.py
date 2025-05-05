@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 import asyncio
 import imaging_server_kit as serverkit
 from imaging_server_kit import AlgorithmServer
-from imaging_server_kit.core import parse_algo_params_schema
+from imaging_server_kit.core import parse_algo_params_schema, encode_contents, decode_contents
 
 templates_dir = importlib.resources.files("imaging_server_kit.core").joinpath("templates")
 static_dir = importlib.resources.files("imaging_server_kit.core").joinpath("static")
@@ -156,9 +156,19 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
             except ValidationError as e:
                 raise HTTPException(status_code=422, detail=e.errors())
 
-            # Here - `image` field should be decoded (TODO: is there a better way?)
+            # `array` fields must be decoded (TODO: is there a better way of handling this?)
             if "image" in data.keys():
-                data["image"] = serverkit.decode_contents(data["image"])
+                data["image"] = decode_contents(data["image"])
+            elif "mask" in data.keys():
+                data["mask"] = decode_contents(data["mask"])
+            elif "points" in data.keys():
+                data["points"] = decode_contents(data["points"])
+            elif "vectors" in data.keys():
+                data["vectors"] = decode_contents(data["vectors"])
+            elif "shapes" in data.keys():
+                data["shapes"] = decode_contents(data["shapes"])
+            elif "tracks" in data.keys():
+                data["tracks"] = decode_contents(data["tracks"])
 
             return await self._run_algo_logic(algorithm_name, data)
 
@@ -219,6 +229,6 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
         load_funct = server.get("load_funct")
         images = load_funct()
         encoded_images = [
-            {"sample_image": serverkit.encode_contents(image)} for image in images
+            {"sample_image": encode_contents(image)} for image in images
         ]
         return {"sample_images": encoded_images}

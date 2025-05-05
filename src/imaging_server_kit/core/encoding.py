@@ -3,6 +3,7 @@ import base64
 import numpy as np
 import tifffile
 
+
 def decode_contents(contents: str) -> np.ndarray:
     """Decodes base64 encoded image contents into a NumPy array.
 
@@ -13,6 +14,7 @@ def decode_contents(contents: str) -> np.ndarray:
         np.ndarray: The decoded image represented as a NumPy array.
     """
     return tifffile.imread(io.BytesIO(base64.b64decode(contents)))
+
 
 def encode_contents(image: np.ndarray) -> str:
     """Encodes a NumPy array image into a base64 string.
@@ -27,3 +29,18 @@ def encode_contents(image: np.ndarray) -> str:
     tifffile.imwrite(img_byte_arr, image)
 
     return base64.b64encode(img_byte_arr.getvalue()).decode()
+
+
+def encode_contents_bytes(image: np.ndarray) -> bytes:
+    """Encodes a NumPy array image into bytes.
+
+    Args:
+        image (np.ndarray): The image to encode.
+
+    Returns:
+        bytes: The bytes representation of the image.
+    """
+    img_byte_arr = io.BytesIO()
+    tifffile.imwrite(img_byte_arr, image)
+
+    return base64.b64encode(img_byte_arr.getvalue())
