@@ -26,26 +26,23 @@ dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "python-multipart",
-    "fastapi-users[sqlalchemy]",
-    "aiosqlite",
+    "httpx",
     "tifffile",
     "numpy",
     "scikit-image",
-    "opencv-contrib-python-headless",
     "imantics",
     "geojson",
-    "jinja2",                         # For the /info route
-    "pyyaml",                         # For the /info route
-    "pytest",                         # For testing
+    "jinja2",
+    "PyYAML",
     "pydantic>=2.0",
     "cookiecutter",
 ]
 
 [project.optional-dependencies]
-docs = [
-    "jupyter-book",
-    "jupytext",
-]
+docs = ["jupyter-book", "jupytext"]
+test = ["pytest"]
+users = ["fastapi-users[sqlalchemy]", "aiosqlite"]
+all = ["imaging-server-kit[docs,test,users]"]
 
 [project.scripts]
 serverkit = "imaging_server_kit.cli:main"
@@ -70,7 +67,7 @@ where = ["src"]
     "templates/*.html",
     "static/css/*",
     "static/js/*",
-    "static/*"
+    "static/*",
 ]
 
 [tool.setuptools_scm]
