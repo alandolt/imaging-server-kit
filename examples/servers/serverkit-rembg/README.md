@@ -3,7 +3,7 @@
 
 Implementation of a web API server for [rembg](https://github.com/danielgatis/rembg).
 
-## Installation with `pip`
+## Installing the algorithm server with `pip`
 
 Install dependencies:
 
@@ -14,38 +14,17 @@ pip install -r requirements.txt
 Run the server:
 
 ```
-uvicorn main:app --host 0.0.0.0 --port 8000
+python main.py
 ```
 
-Running tests:
+The server will be running on http://localhost:8000.
+
+## Using `docker-compose`
+
+To build the docker image and run a container for the algorithm server in a single command, use:
 
 ```
-pytest
+docker compose up
 ```
 
-## Installation with `docker`
-
-Build the docker image:
-
-```
-docker build -t serverkit-rembg .
-```
-
-Run the server in a container:
-
-```
-docker run -it --rm -p 8000:8000 serverkit-rembg:latest
-```
-
-Running tests:
-
-```
-docker run --rm serverkit-rembg:latest pytest
-```
-
-Pushing the image to `registry.rcp.epfl.ch`:
-
-```
-docker tag serverkit-rembg registry.rcp.epfl.ch/imaging-server-kit/serverkit-rembg
-docker push registry.rcp.epfl.ch/imaging-server-kit/serverkit-rembg
-```
+The server will be running on http://localhost:8000.

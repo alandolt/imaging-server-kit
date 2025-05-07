@@ -2,3 +2,4 @@ imaging-server-kit
 tensorflow
 stardist
 numpy==1.26.4
+opencv-contrib-python-headless

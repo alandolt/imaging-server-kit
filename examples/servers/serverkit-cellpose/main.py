@@ -70,7 +70,7 @@ def cellpose_server(
     cellprob_threshold: float,
 ) -> List[tuple]:
     """Runs the algorithm."""
-    model = models.Cellpose(
+    model = models.CellposeModel(
         gpu=False,  # For now
         model_type=model_name,
     )
@@ -81,7 +81,7 @@ def cellpose_server(
             "Diameter is set to None. The size of the cells will be estimated on a per image basis"
         )
 
-    segmentation, flows, styles, diams = model.eval(
+    segmentation, flows, styles = model.eval(
         image,
         diameter=diameter,
         flow_threshold=flow_threshold,

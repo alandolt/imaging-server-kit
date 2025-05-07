@@ -3,4 +3,4 @@ cellpose
 torch
 torchvision 
 torchaudio
-opencv-python-headless
+opencv-contrib-python-headless
