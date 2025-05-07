@@ -36,6 +36,7 @@ dependencies = [
     "PyYAML",
     "pydantic>=2.0",
     "cookiecutter",
+    "opencv-contrib-python-headless",
 ]
 
 [project.optional-dependencies]
@@ -48,8 +49,8 @@ all = ["imaging-server-kit[docs,test,users]"]
 serverkit = "imaging_server_kit.cli:main"
 
 [project.urls]
-homepage = "https://imaging-server-kit.github.io/imaging-server-kit"
 repository = "https://github.com/Imaging-Server-Kit/imaging-server-kit"
+documentation = "https://imaging-server-kit.github.io/imaging-server-kit"
 
 [build-system]
 requires = ["setuptools>=42.0.0", "wheel", "setuptools_scm"]

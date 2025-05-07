@@ -20,6 +20,7 @@ def decode_image_array(cls, v, dimensionality) -> "np.ndarray":
 
     return image_array
 
+# TODO - we could also validate the points or vectors dimensionality
 
 def parse_params(parameters: dict) -> BaseModel:
     fields = {}
@@ -47,7 +48,7 @@ def parse_params(parameters: dict) -> BaseModel:
                 "widget_type"
             ] = param_details.widget_type
 
-            if param_details.widget_type == "image":
+            if param_details.widget_type in ["image", "mask"]:
                 validated_func = partial(
                     decode_image_array, dimensionality=param_details.dimensionality
                 )
@@ -55,7 +56,7 @@ def parse_params(parameters: dict) -> BaseModel:
                 validators[validator_name] = field_validator(param_name, mode="after")(
                     validated_func
                 )
-
+            
             fields[param_name] = (param_details.type, Field(**field_constraints))
 
     return create_model(
