@@ -20,7 +20,17 @@ def decode_image_array(cls, v, dimensionality) -> "np.ndarray":
 
     return image_array
 
-# TODO - we could also validate the points or vectors dimensionality
+def decode_points_array(cls, v, dimensionality) -> "np.ndarray":
+    points_array = decode_contents(v)
+
+    if points_array.shape[1] not in dimensionality:
+        raise ValueError("Array has the wrong dimensionality.")
+
+    return points_array
+
+def decode_generic(cls, v, dimensionality) -> "np.ndarray":
+    # TODO: there should also be functions to validate dimensionality for tracks and vectors.
+    return decode_contents(v)
 
 def parse_params(parameters: dict) -> BaseModel:
     fields = {}
@@ -48,9 +58,26 @@ def parse_params(parameters: dict) -> BaseModel:
                 "widget_type"
             ] = param_details.widget_type
 
+
             if param_details.widget_type in ["image", "mask"]:
                 validated_func = partial(
                     decode_image_array, dimensionality=param_details.dimensionality
+                )
+                validator_name = f"validate_{param_name}_image"
+                validators[validator_name] = field_validator(param_name, mode="after")(
+                    validated_func
+                )
+            elif param_details.widget_type == "points":
+                validated_func = partial(
+                    decode_points_array, dimensionality=param_details.dimensionality
+                )
+                validator_name = f"validate_{param_name}_image"
+                validators[validator_name] = field_validator(param_name, mode="after")(
+                    validated_func
+                )
+            elif param_details.widget_type in ["vectors", "tracks", "shapes"]:
+                validated_func = partial(
+                    decode_generic, dimensionality=param_details.dimensionality
                 )
                 validator_name = f"validate_{param_name}_image"
                 validators[validator_name] = field_validator(param_name, mode="after")(
