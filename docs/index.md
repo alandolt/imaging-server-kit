@@ -16,22 +16,18 @@ def segmentation_server(image):
     return [(segmentation, {}, "mask")]
 ```
 
-<!-- - Automatically generate UIs in Napari and QuPath to test your tools. -->
-
 ## Supported image analysis tasks
 
 | Task              | Examples                        | Napari | QuPath |
 |-------------------|---------------------------------| ------ | ------ |
-| Segmentation     | [StarDist](https://github.com/Imaging-Server-Kit/serverkit-stardist), [CellPose](https://github.com/Imaging-Server-Kit/serverkit-cellpose), [Rembg](https://github.com/Imaging-Server-Kit/serverkit-rembg), [SAM-2](https://github.com/Imaging-Server-Kit/serverkit-sam2), [InstanSeg](https://github.com/Imaging-Server-Kit/serverkit-instanseg)               | ✅ | ✅ |
-| Object detection | [Spotiflow](https://github.com/Imaging-Server-Kit/serverkit-spotiflow), [LoG detector](https://github.com/Imaging-Server-Kit/serverkit-skimage-LoG)    | ✅ | ✅ |
-| Vector fields   | [Orientationpy](https://github.com/Imaging-Server-Kit/serverkit-orientationpy)                   | ✅ | ✅ |
-| Object tracking  | [Trackastra](https://github.com/Imaging-Server-Kit/serverkit-trackastra), [Trackpy](https://github.com/Imaging-Server-Kit/serverkit-trackpy)         | ✅ |  |
-| Image-to-Image  | [SPAM](https://github.com/Imaging-Server-Kit/serverkit-spam), [Noise2Void](https://github.com/Imaging-Server-Kit/serverkit-n2v)         | ✅ |  |
-| Text-to-Image   | [Stable Diffusion](https://github.com/Imaging-Server-Kit/serverkit-stable-diffusion)         | ✅ |  |
-| Image-to-Text   | [Image captioning](https://github.com/Imaging-Server-Kit/serverkit-blip-captioning)         | ✅ |  |
-| Classification   | [ResNet50](https://github.com/Imaging-Server-Kit/serverkit-resnet50)         | ✅ |  |
-
-A gallery of example implementations for commonly used algorithms is available in the [repository](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples).
+| Segmentation     | [StarDist](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples/servers/serverkit-stardist), [CellPose](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples/servers/serverkit-cellpose), [Rembg](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples/servers/serverkit-rembg), [SAM-2](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-sam2), [InstanSeg](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-instanseg)               | ✅ | ✅ |
+| Object detection | [Spotiflow](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-spotiflow), [LoG detector](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples/servers/serverkit-skimage-log)    | ✅ | ✅ |
+| Vector fields    | [Orientationpy](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples/servers/serverkit-orientationpy)                   | ✅ | ✅ |
+| Object tracking  | [Trackpy](https://github.com/Imaging-Server-Kit/imaging-server-kit/tree/main/examples/servers/serverkit-trackpy), [Trackastra]()         | ✅ |  |
+| Image-to-Image   | [SPAM](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-spam), [Noise2Void](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-n2v)         | ✅ |  |
+| Text-to-Image    | [Stable Diffusion](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-stable-diffusion)         | ✅ |  |
+| Image-to-Text    | [Image captioning](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-blip-captioning)         | ✅ |  |
+| Classification   | [ResNet50](https://github.com/Imaging-Server-Kit/extra-examples/tree/main/examples/serverkit-resnet50)         | ✅ |  |
 
 ## Installation
 
