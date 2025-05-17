@@ -127,9 +127,14 @@ def skimage_log_server(
         },  # sigmas = numpy array representing the point size
     }
 
-    return [
-        (points, points_params, "points"),
-    ]
+    if len(points):
+        return [
+            (points, points_params, "points"),
+        ]
+    else:
+        return [
+            ("No points were detected.", {}, "text")
+        ]
 
 
 if __name__ == "__main__":
