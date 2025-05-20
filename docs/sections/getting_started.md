@@ -10,7 +10,7 @@ serverkit demo
 
 This will start a demo web server for a simple intensity threshold algorithm.
 
-The server will be running on http://localhost:8000. Open your web browser and navigate to this page to check that the server is running. You should see a web page displaying information about the running threshold algorithm server.
+The server will be running on http://localhost:8000. Open your web browser and navigate to this page to check that the server is running. You should see a web page displaying information about the threshold algorithm server.
 
 ![screenshot](../assets/screenshot_running_server.png)
 
@@ -42,7 +42,7 @@ You can also interact with the algorithm server via QuPath. To try it out, you n
 
 ## Usage from Python
 
-It is also possible to connect to an algorithm server and run computation from Python directly:
+It is also possible to connect to an algorithm server and run computations from Python directly:
 
 ```python
 from imaging_server_kit import Client

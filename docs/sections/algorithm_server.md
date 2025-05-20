@@ -23,7 +23,7 @@ To turn this function into to an algorithm server, we first need to modify the f
 
 ## Make the function return a list of data tuples
 
-The function should return a list of tuples ("data tuples"). Each tuple represents one distinct output of the algorithm.
+The function should return a list of tuples. Each tuple has three elements and represents a distinct output of the algorithm.
 
 Our threshold algorithm only has one output: the segmentation mask resulting from thresholding.
 
@@ -36,13 +36,13 @@ def threshold_algo_server(image: np.ndarray, threshold: float):
 The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0.4.15/guides/magicgui.html?highlight=layerdatatuple) model. They include three elements:
 
 - The *first element* is the **data**, usually in the form of a Numpy array. The shape and interpretation of the axes depends on what the output represents (cf. table below).
-- The *second element* is optional **metadata** associated with the output, represented as a Python dictionary. It can be empty (`{}`). These metadata are used to affect how the output is displayed in client apps.
+- The *second element* is a Python dictionary representing **metadata** associated with the output. It can be empty (`{}`). These metadata are used to affect how the output is displayed in client apps (e.g. Napari).
 - The *third element* is the output type: a string identifying what the output represents.
 
 | Output type       | Description                                                                                           |
 | ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `"image"`         | An image or image-like data (incl. 3D and RGB) as a nD array.                                         |
-| `"mask"`          | A segmentation mask (2D, 3D) as integer nD array. Integers represent the **object class**.            |
+| `"image"`         | An image or image-like data (incl. 3D and RGB) as a numpy array.                                         |
+| `"mask"`          | A segmentation mask (2D, 3D) as integer numpy array. Integers represent the **object class**.            |
 | `"instance_mask"` | A segmentation mask (2D, 3D) as integer nD array. Integers represent **object instances**.            |
 | `"points"`        | A collection of point coordinates (array of shape (N, 2) or (N, 3)).                                  |
 | `"boxes"`         | A collection of boxes (array of shape (N, 4) representing the top-left and bottom-right box corners). |
@@ -51,7 +51,7 @@ The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0
 | `"class"`         | A class label (for image classification).                                                             |
 | `"text"`          | A string of text (for example, for image captioning).                                                 |
 
-The function can return an arbitrary number of outputs, following the pattern:
+The function can return multiple outputs, following the pattern:
 
 ```
 # Body of the function
@@ -68,10 +68,11 @@ The function parameters can only be **numpy arrays**, **numeric values** (`int`,
 
 ## Decorate the function with `@algorithm_server`
 
-This serves several purposes:
+This has several purposes:
 
 - It converts the python function to a FastAPI server with predefined routes (cf. [API Endpoints](api_endpoints)).
 - It enables the server to validate algorithm parameters when receiving requests.
+- It tells client apps (Napari, QuPath) how to render the parameter in the user interface.
 - Optional info about the algorithm server can be added to populate its `info` page.
 
 Below is our decorated threshold algorithm function:
