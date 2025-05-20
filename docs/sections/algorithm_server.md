@@ -72,7 +72,7 @@ This has several purposes:
 
 - It converts the python function to a FastAPI server with predefined routes (cf. [API Endpoints](api_endpoints)).
 - It enables the server to validate algorithm parameters when receiving requests.
-- It tells client apps (Napari, QuPath) how to render the parameter in the user interface.
+- It tells client apps (Napari, QuPath) how to render the parameters in the user interface.
 - Optional info about the algorithm server can be added to populate its `info` page.
 
 Below is our decorated threshold algorithm function:
