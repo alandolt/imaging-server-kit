@@ -27,7 +27,11 @@ def mask2features(segmentation_mask: np.ndarray) -> List[Feature]:
         for detection_id, contour in enumerate(polygons.points, start=1):
             coords = np.array(contour)
             coords = np.vstack([coords, coords[0]])  # Close the polygon for QuPath
-            geom = Polygon(coordinates=[coords.tolist()])
+            try:
+                geom = Polygon(coordinates=[coords.tolist()], validate=True)
+            except ValueError:
+                # TODO: not sure what to do when this happens (very occasionally)
+                print("Found an invalid polygon...")
             feature = Feature(
                 geometry=geom, 
                 properties={
@@ -75,7 +79,11 @@ def instance_mask2features(segmentation_mask: np.ndarray) -> List[Feature]:
         for contour in polygons.points:
             coords = np.array(contour)
             coords = np.vstack([coords, coords[0]])  # Close the polygon for QuPath
-            geom = Polygon(coordinates=[coords.tolist()])
+            try:
+                geom = Polygon(coordinates=[coords.tolist()], validate=True)
+            except ValueError:
+                # TODO: not sure what to do when this happens (very occasionally)
+                print("Found an invalid polygon...")
             feature = Feature(
                 geometry=geom, 
                 properties={
@@ -170,7 +178,10 @@ def boxes2features(boxes: np.ndarray) -> List[Feature]:
         coords.append(
             coords[0]
         )  # Add the first element at the end to close the Polygon
-        geom = Polygon(coordinates=[coords])
+        try:
+            geom = Polygon(coordinates=[coords], validate=True)
+        except ValueError:
+            print("Invalid box polygon found.")
         features.append(Feature(geometry=geom, properties={"Detection ID": i}))
     return features
 
