@@ -45,7 +45,7 @@ The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0
 | `"mask"`          | A segmentation mask (2D, 3D) as integer numpy array. Integers represent the **object class**.            |
 | `"instance_mask"` | A segmentation mask (2D, 3D) as integer nD array. Integers represent **object instances**.            |
 | `"points"`        | A collection of point coordinates (array of shape (N, 2) or (N, 3)).                                  |
-| `"boxes"`         | A collection of boxes (array of shape (N, 4) representing the top-left and bottom-right box corners). |
+| `"boxes"`         | A collection of boxes (array of shape (N, 4, 2) representing the box corners). |
 | `"vectors"`       | Array of vectors in the Napari [Vectors](https://napari.org/stable/howtos/layers/vectors.html) format.|
 | `"tracks"`        | Array of tracks in the Napari [Tracks](https://napari.org/stable/howtos/layers/tracks.html) format.   |
 | `"class"`         | A class label (for image classification).                                                             |

@@ -181,7 +181,8 @@ def boxes2features(boxes: np.ndarray) -> List[Feature]:
         try:
             geom = Polygon(coordinates=[coords], validate=True)
         except ValueError:
-            print("Invalid box polygon found.")
+            print("Invalid box polygon found. Expected an array of shape (N, 4, D) representing the corners of the box.")
+            geom = None  # TODO: should we handle this better?
         features.append(Feature(geometry=geom, properties={"Detection ID": i}))
     return features
 
