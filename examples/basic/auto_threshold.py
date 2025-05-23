@@ -14,7 +14,7 @@ from imaging_server_kit import algorithm_server, ImageUI, DropDownUI
     parameters={
         "image": ImageUI(),
         "method": DropDownUI(
-            default="otsu",
+            default="Otsu",
             title="Method",
             description="Auto-threshold method.",
             items=["Otsu", "Li"],

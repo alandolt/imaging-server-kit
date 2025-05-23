@@ -11,7 +11,6 @@ from .encoding import decode_contents
 class BaseParamsModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-
 def decode_image_array(cls, v, dimensionality) -> "np.ndarray":
     image_array = decode_contents(v)
 
@@ -57,7 +56,6 @@ def parse_params(parameters: dict) -> BaseModel:
             field_constraints["json_schema_extra"][
                 "widget_type"
             ] = param_details.widget_type
-
 
             if param_details.widget_type in ["image", "mask"]:
                 validated_func = partial(

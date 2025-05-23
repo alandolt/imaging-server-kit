@@ -13,9 +13,15 @@ from contextlib import asynccontextmanager
 import asyncio
 import imaging_server_kit as serverkit
 from imaging_server_kit import AlgorithmServer
-from imaging_server_kit.core import parse_algo_params_schema, encode_contents, decode_contents
+from imaging_server_kit.core import (
+    parse_algo_params_schema,
+    encode_contents,
+    decode_contents,
+)
 
-templates_dir = importlib.resources.files("imaging_server_kit.core").joinpath("templates")
+templates_dir = importlib.resources.files("imaging_server_kit.core").joinpath(
+    "templates"
+)
 static_dir = importlib.resources.files("imaging_server_kit.core").joinpath("static")
 
 templates = Jinja2Templates(directory=str(templates_dir))
@@ -31,7 +37,9 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
 
         # Centralized exception handlers
         @self.app.exception_handler(RequestValidationError)
-        async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        async def validation_exception_handler(
+            request: Request, exc: RequestValidationError
+        ):
             return JSONResponse(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 content={"error_type": "validation_error", "detail": exc.errors()},
@@ -40,12 +48,14 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
         @self.app.exception_handler(Exception)
         async def generic_exception_handler(request: Request, exc: Exception):
             from fastapi import HTTPException
+
             if isinstance(exc, HTTPException):
                 raise exc
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"error_type": "internal_server_error", "message": str(exc)},
             )
+
         self.app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
         self.services = [server_name]
 
@@ -119,8 +129,10 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
             request: Request = ...,
         ):
             if algorithm_name not in self.algorithms:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                    detail=f"Algorithm {algorithm_name} not found")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Algorithm {algorithm_name} not found",
+                )
             algo_info = self.algorithms[algorithm_name].get("algo_info")
             algo_params_schema = get_algo_params(algorithm_name)
             algo_params = parse_algo_params_schema(algo_params_schema)
@@ -142,8 +154,10 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
             request: Request = ...,
         ):
             if algorithm_name not in self.algorithms:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                    detail=f"Algorithm {algorithm_name} not found")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Algorithm {algorithm_name} not found",
+                )
 
             parameters_model = self.algorithms.get(algorithm_name, {}).get(
                 "parameters_model"
@@ -156,34 +170,26 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
             except ValidationError as e:
                 raise HTTPException(status_code=422, detail=e.errors())
 
-            # `array` fields must be decoded (TODO: is there a better way of handling this?)
-            if "image" in data.keys():
-                data["image"] = decode_contents(data["image"])
-            elif "mask" in data.keys():
-                data["mask"] = decode_contents(data["mask"])
-            elif "points" in data.keys():
-                data["points"] = decode_contents(data["points"])
-            elif "vectors" in data.keys():
-                data["vectors"] = decode_contents(data["vectors"])
-            elif "shapes" in data.keys():
-                data["shapes"] = decode_contents(data["shapes"])
-            elif "tracks" in data.keys():
-                data["tracks"] = decode_contents(data["tracks"])
+            decoded_params = algo_params.dict()
 
-            return await self._run_algo_logic(algorithm_name, data)
+            return await self._run_algo_logic(algorithm_name, decoded_params)
 
         @self.app.get("/{algorithm_name}/parameters", response_model=dict)
         def get_algo_params(algorithm_name):
             if algorithm_name not in self.algorithms:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                    detail=f"Algorithm {algorithm_name} not found")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Algorithm {algorithm_name} not found",
+                )
             return self.get_algorithm_params(algorithm_name)
 
         @self.app.get("/{algorithm_name}/sample_images", response_model=dict)
         def get_sample_images(algorithm_name):
             if algorithm_name not in self.algorithms:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                    detail=f"Algorithm {algorithm_name} not found")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Algorithm {algorithm_name} not found",
+                )
             return self.get_algorithm_sample_images(algorithm_name)
 
     async def _serialize_result_tuple(self, result_data_tuple):
@@ -228,7 +234,5 @@ class MultiAlgorithmServer:  # TODO: could this inherit from algoserver somehow?
         server = self.algorithms.get(algorithm_name)
         load_funct = server.get("load_funct")
         images = load_funct()
-        encoded_images = [
-            {"sample_image": encode_contents(image)} for image in images
-        ]
+        encoded_images = [{"sample_image": encode_contents(image)} for image in images]
         return {"sample_images": encoded_images}
