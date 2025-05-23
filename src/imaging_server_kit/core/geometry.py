@@ -189,7 +189,7 @@ def boxes2features(boxes: np.ndarray) -> List[Feature]:
 
 def features2boxes(features):
     boxes = np.array([feature["geometry"]["coordinates"] for feature in features])
-    boxes = np.squeeze(boxes)
+    boxes = np.array([box[0] for box in boxes])  # We get back a shape of (N, 1, 5, 2) - so we remove dim. 1
     boxes = boxes[:, :-1] # Remove the last element
     boxes = boxes[:, :, ::-1]  # Invert XY
     return boxes
