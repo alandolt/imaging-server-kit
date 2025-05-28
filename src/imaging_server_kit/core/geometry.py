@@ -29,17 +29,17 @@ def mask2features(segmentation_mask: np.ndarray) -> List[Feature]:
             coords = np.vstack([coords, coords[0]])  # Close the polygon for QuPath
             try:
                 geom = Polygon(coordinates=[coords.tolist()], validate=True)
+                feature = Feature(
+                    geometry=geom, 
+                    properties={
+                        "Detection ID": detection_id, 
+                        "Class": int(pixel_class),  # the int() casting solves a bug with json serialization
+                    }
+                )
+                features.append(feature)
             except ValueError:
                 # TODO: not sure what to do when this happens (very occasionally)
                 print("Found an invalid polygon...")
-            feature = Feature(
-                geometry=geom, 
-                properties={
-                    "Detection ID": detection_id, 
-                    "Class": int(pixel_class),  # the int() casting solves a bug with json serialization
-                }
-            )
-            features.append(feature)
 
     return features
 
@@ -81,17 +81,17 @@ def instance_mask2features(segmentation_mask: np.ndarray) -> List[Feature]:
             coords = np.vstack([coords, coords[0]])  # Close the polygon for QuPath
             try:
                 geom = Polygon(coordinates=[coords.tolist()], validate=True)
+                feature = Feature(
+                    geometry=geom, 
+                    properties={
+                        "Detection ID": int(detection_id), 
+                        "Class": 1
+                    }
+                )
+                features.append(feature)
             except ValueError:
                 # TODO: not sure what to do when this happens (very occasionally)
                 print("Found an invalid polygon...")
-            feature = Feature(
-                geometry=geom, 
-                properties={
-                    "Detection ID": int(detection_id), 
-                    "Class": 1
-                }
-            )
-            features.append(feature)
 
     return features
 
