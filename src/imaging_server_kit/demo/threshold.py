@@ -2,8 +2,7 @@ from pathlib import Path
 import numpy as np
 import uvicorn
 from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
-from skimage.util import img_as_float
-
+from skimage.exposure import rescale_intensity
 
 @algorithm_server(
     algorithm_name="intensity-threshold",
@@ -29,7 +28,7 @@ def threshold_algo_server(
     threshold: float,
 ):
     """Implements a simple intensity threshold algorithm."""
-    mask = img_as_float(image) > threshold
+    mask = rescale_intensity(image, out_range=(0, 1)) > threshold
     return [(mask, {"name": "Threshold result"}, "mask")]
 
 
