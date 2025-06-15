@@ -36,7 +36,7 @@ def threshold_algo_server(image: np.ndarray, threshold: float):
 The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0.4.15/guides/magicgui.html?highlight=layerdatatuple) model. They include three elements:
 
 - The *first element* is the **data**, usually in the form of a Numpy array. The shape and interpretation of the axes depends on what the output represents (cf. table below).
-- The *second element* is a Python dictionary representing **metadata** associated with the output. It can be empty (`{}`). These metadata are used to affect how the output is displayed in client apps (e.g. Napari).
+- The *second element* is a Python dictionary representing **metadata** associated with the output. It can be empty (`{}`). These metadata can include detection features such as *measurements* and *class labels*, and are used to affect how the output is displayed in client apps (e.g. Napari).
 - The *third element* is the output type: a string identifying what the output represents.
 
 | Output type       | Description                                                                                            |
@@ -65,6 +65,26 @@ return [
 ```{admonition} Are there any other constraints on the Python function?
 The function parameters can only be **numpy arrays**, **numeric values** (`int`, `float`), **booleans** or **strings**.
 ```
+
+````{admonition} Handling detection features and class labels
+You can assign *measurements* and *class labels* to detected objects, such as `boxes`, `points`, or `instance_mask` types. To do this, use the `features` parameter in the output metadata. For example:
+
+```python
+boxes = (...)  # Numpy array of shape (N, 2, 2)
+probabilities = (...)  # Numpy array of shape (N,) ([0.22, 0.23, 0.65...])
+classes = (...)  # List of class labels (["elephant", "giraff", "giraff"...])
+
+boxes_params = {
+    "name": "YOLO detections",
+    "edge_color": "class",  # Optional, to parametrize object color in Napari
+    "features": {
+        "probability": probabilities,  # Detection measurements
+        "class": classes,  # Classifications must be called "class"
+    },
+}
+return [(boxes, boxes_params, "boxes")]
+```
+````
 
 ## Decorate the function with `@algorithm_server`
 
