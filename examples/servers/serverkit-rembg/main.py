@@ -21,7 +21,7 @@ sessions: dict[str, rembg.sessions.BaseSession] = {}
             default="silueta",
             title="Model",
             description="The model used for background removal.",
-            items=["silueta", "isnet", "u2net", "u2netp", "sam"],
+            items=["silueta", "u2net"],
         ),
     },
     sample_images=[
@@ -41,42 +41,15 @@ def rembg_server(
 
     session = sessions.setdefault(rembg_model_name, rembg.new_session(rembg_model_name))
 
-    if rembg_model_name == "sam":
-        x0, y0, x1, y1 = 0, 0, image.shape[0], image.shape[1]
+    segmentation = rembg.remove(
+        data=image,
+        session=session,
+        only_mask=True,
+        post_process_mask=True,
+    )
+    segmentation = segmentation == 255
 
-        prompt = [
-            {
-                "type": "rectangle",
-                "data": [y0, x0, y1, x1],
-                "label": 2,  # `label` is irrelevant for SAM in bounding boxes mode
-            }
-        ]
-
-        segmentation = rembg.remove(
-            data=image,
-            session=session,
-            only_mask=True,
-            post_process_mask=True,
-            sam_prompt=prompt,
-        )
-        segmentation = segmentation == 0  # Invert it (for some reason)
-
-    else:
-        segmentation = rembg.remove(
-            data=image,
-            session=session,
-            only_mask=True,
-            post_process_mask=True,
-        )
-        segmentation = segmentation == 255
-
-    segmentation_params = {
-        "name": f"{rembg_model_name}_result",
-    }
-
-    return [
-        (segmentation, segmentation_params, "mask"),
-    ]
+    return [(segmentation, {"name": f"{rembg_model_name}_result"}, "mask")]
 
 
 if __name__ == "__main__":
