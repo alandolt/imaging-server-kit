@@ -36,7 +36,7 @@ class FloatSpinBoxUI(ParameterUI):
         min: float = 0.0,
         max: float = 1000.0,
         step: float = 0.1,
-        default: float = None,
+        default: float = 0.0,
     ):
         super().__init__(title, description)
         self.min = min
@@ -55,7 +55,7 @@ class IntSpinBoxUI(ParameterUI):
         min: int = 0,
         max: int = 1000,
         step: int = 1,
-        default: int = None,
+        default: int = 0,
     ):
         super().__init__(title, description)
         self.min = min
@@ -71,7 +71,7 @@ class BoolUI(ParameterUI):
         self,
         title="Bool",
         description="Boolean parameter",
-        default: bool = None,
+        default: bool = False,
     ):
         super().__init__(title, description)
         self.type = bool
@@ -84,7 +84,7 @@ class StringUI(ParameterUI):
         self,
         title="String",
         description="String parameter",
-        default: str = None,
+        default: str = "",
     ):
         super().__init__(title, description)
         self.type = str

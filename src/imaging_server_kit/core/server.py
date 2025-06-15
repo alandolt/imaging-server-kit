@@ -69,9 +69,8 @@ class AlgorithmServer:
         self.algorithm_name = algorithm_name
         self.parameters_model = parameters_model
 
-        if metadata_file is not None:
-            if Path(metadata_file).exists():
-                self.algo_info = load_from_yaml(metadata_file)
+        if metadata_file is not None and Path(metadata_file).exists():
+            self.algo_info = load_from_yaml(metadata_file)
         else:
             self.algo_info = {
                 "project_slug": algorithm_name,
