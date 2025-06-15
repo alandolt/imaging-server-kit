@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import uvicorn
-from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
+from imaging_server_kit import algorithm_server, ImageUI, FloatUI
 from skimage.util import img_as_float
 
 
@@ -13,7 +13,7 @@ from skimage.util import img_as_float
     tags=["Demo"],
     parameters={
         "image": ImageUI(),
-        "threshold": FloatSpinBoxUI(
+        "threshold": FloatUI(
             default=0.5,
             min=0.0,
             max=1.0,

@@ -6,7 +6,7 @@ import pandas as pd
 import trackpy as tp
 import uvicorn
 
-from imaging_server_kit import IntSpinBoxUI, PointsUI, algorithm_server
+from imaging_server_kit import IntUI, PointsUI, algorithm_server
 
 
 @algorithm_server(
@@ -17,13 +17,13 @@ from imaging_server_kit import IntSpinBoxUI, PointsUI, algorithm_server
             description="The points to track.",
             dimensionality=[2, 3],
         ),
-        "search_range": IntSpinBoxUI(
+        "search_range": IntUI(
             default=30,
             title="Search range",
             description="Search range in pixels.",
             max=100,
         ),
-        "memory": IntSpinBoxUI(
+        "memory": IntUI(
             default=3,
             title="Memory",
             description="Maximum number of skipped frames for a single track.",

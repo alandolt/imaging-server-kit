@@ -28,7 +28,7 @@ class DropDownUI(ParameterUI):
         self.widget_type = "dropdown"
 
 
-class FloatSpinBoxUI(ParameterUI):
+class FloatUI(ParameterUI):
     def __init__(
         self,
         title="Float",
@@ -47,7 +47,7 @@ class FloatSpinBoxUI(ParameterUI):
         self.widget_type = "float"
 
 
-class IntSpinBoxUI(ParameterUI):
+class IntUI(ParameterUI):
     def __init__(
         self,
         title="Int",

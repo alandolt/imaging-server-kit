@@ -5,8 +5,13 @@ import numpy as np
 import uvicorn
 from cellpose import models
 
-from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
-                                IntSpinBoxUI, algorithm_server)
+from imaging_server_kit import (
+    DropDownUI,
+    FloatUI,
+    ImageUI,
+    IntUI,
+    algorithm_server,
+)
 
 
 @algorithm_server(
@@ -23,7 +28,7 @@ from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
             description="The model used for instance segmentation",
             items=["cyto", "nuclei", "cyto2"],
         ),
-        "diameter": IntSpinBoxUI(
+        "diameter": IntUI(
             default=20,
             title="Cell diameter (px)",
             description="The approximate size of the objects to detect",
@@ -31,7 +36,7 @@ from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
             max=100,
             step=1,
         ),
-        "flow_threshold": FloatSpinBoxUI(
+        "flow_threshold": FloatUI(
             default=0.3,
             title="Flow threshold",
             description="The flow threshold",
@@ -39,7 +44,7 @@ from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
             max=1.0,
             step=0.05,
         ),
-        "cellprob_threshold": FloatSpinBoxUI(
+        "cellprob_threshold": FloatUI(
             default=0.5,
             title="Probability threshold",
             description="The detection probability threshold",

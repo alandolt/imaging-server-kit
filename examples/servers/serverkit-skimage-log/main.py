@@ -8,9 +8,9 @@ from skimage.util import img_as_float
 
 from imaging_server_kit import (
     BoolUI,
-    FloatSpinBoxUI,
+    FloatUI,
     ImageUI,
-    IntSpinBoxUI,
+    IntUI,
     algorithm_server,
 )
 
@@ -19,7 +19,7 @@ from imaging_server_kit import (
     algorithm_name="skimage-LoG",
     parameters={
         "image": ImageUI(),
-        "min_sigma": FloatSpinBoxUI(
+        "min_sigma": FloatUI(
             default=5.0,
             title="Min sigma",
             description="Minimum standard deviation of the Gaussian kernel, in pixels.",
@@ -27,7 +27,7 @@ from imaging_server_kit import (
             max=100.0,
             step=0.1,
         ),
-        "max_sigma": FloatSpinBoxUI(
+        "max_sigma": FloatUI(
             default=10.0,
             title="Max sigma",
             description="Maximum standard deviation of the Gaussian kernel, in pixels.",
@@ -35,7 +35,7 @@ from imaging_server_kit import (
             max=100.0,
             step=0.1,
         ),
-        "num_sigma": IntSpinBoxUI(
+        "num_sigma": IntUI(
             default=10,
             title="Num sigma",
             description="Number of intermediate sigma values to compute between the min_sigma and max_sigma.",
@@ -43,7 +43,7 @@ from imaging_server_kit import (
             max=100,
             step=1,
         ),
-        "threshold": FloatSpinBoxUI(
+        "threshold": FloatUI(
             default=0.1,
             title="Threshold",
             description="Lower bound for scale space maxima.",
@@ -132,9 +132,7 @@ def skimage_log_server(
             (points, points_params, "points"),
         ]
     else:
-        return [
-            ("No points were detected.", {}, "text")
-        ]
+        return [("No points were detected.", {}, "text")]
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ import numpy as np
 import uvicorn
 from pystackreg import StackReg
 
-from imaging_server_kit import algorithm_server, ImageUI, DropDownUI, IntSpinBoxUI
+from imaging_server_kit import algorithm_server, ImageUI, DropDownUI, IntUI
 
 
 reg_type_dict = {
@@ -36,7 +36,7 @@ reg_type_dict = {
             items=["previous", "first", "mean"],
             default="previous",
         ),
-        "axis": IntSpinBoxUI(
+        "axis": IntUI(
             title="Axis",
             description="Registration axis.",
             default=0,

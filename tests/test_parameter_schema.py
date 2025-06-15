@@ -7,8 +7,8 @@ import pytest
 
 from imaging_server_kit import (
     algorithm_server,
-    IntSpinBoxUI,
-    FloatSpinBoxUI,
+    IntUI,
+    FloatUI,
     DropDownUI,
     ImageUI,
 )
@@ -17,10 +17,8 @@ from imaging_server_kit import (
 @algorithm_server(
     algorithm_name="paramtest",
     parameters={
-        "n": IntSpinBoxUI("Number", "Number desc", min=1, max=5, step=1, default=3),
-        "f": FloatSpinBoxUI(
-            "Float", "Float desc", min=0.1, max=1.0, step=0.1, default=0.5
-        ),
+        "n": IntUI("Number", "Number desc", min=1, max=5, step=1, default=3),
+        "f": FloatUI("Float", "Float desc", min=0.1, max=1.0, step=0.1, default=0.5),
         "opt": DropDownUI("Option", "Option desc", items=["a", "b", "c"], default="b"),
     },
     sample_images=[],

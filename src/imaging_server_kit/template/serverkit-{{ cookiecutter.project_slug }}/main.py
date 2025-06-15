@@ -2,15 +2,17 @@
 Algorithm server definition.
 Documentation: https://imaging-server-kit.github.io/imaging-server-kit/
 """
+
 from typing import List
 from pathlib import Path
 import numpy as np
 import uvicorn
 from skimage.util import img_as_float
-from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
+from imaging_server_kit import algorithm_server, ImageUI, FloatUI
 
 # Import your package if needed (also add it to requirements.txt)
 # import [...]
+
 
 @algorithm_server(
     algorithm_name="{{ cookiecutter.project_slug }}",
@@ -25,7 +27,7 @@ from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
             description="Input image (2D, 3D)",
             dimensionality=[2, 3],
         ),
-        "threshold": FloatSpinBoxUI(
+        "threshold": FloatUI(
             default=0.5,
             title="Threshold",
             description="Intensity threshold.",

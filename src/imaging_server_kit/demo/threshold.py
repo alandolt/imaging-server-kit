@@ -1,8 +1,9 @@
 from pathlib import Path
 import numpy as np
 import uvicorn
-from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
+from imaging_server_kit import algorithm_server, ImageUI, FloatUI
 from skimage.exposure import rescale_intensity
+
 
 @algorithm_server(
     algorithm_name="intensity-threshold",
@@ -12,7 +13,7 @@ from skimage.exposure import rescale_intensity
     tags=["Demo"],
     parameters={
         "image": ImageUI(),
-        "threshold": FloatSpinBoxUI(
+        "threshold": FloatUI(
             default=0.5,
             title="Threshold",
             description="Intensity threshold.",

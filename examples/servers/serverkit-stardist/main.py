@@ -6,8 +6,7 @@ import uvicorn
 from csbdeep.utils import normalize
 from stardist.models import StarDist2D
 
-from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
-                                algorithm_server)
+from imaging_server_kit import DropDownUI, FloatUI, ImageUI, algorithm_server
 
 
 @algorithm_server(
@@ -24,7 +23,7 @@ from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
             description="The model used for nuclei segmentation",
             items=["2D_versatile_fluo", "2D_versatile_he"],
         ),
-        "prob_thresh": FloatSpinBoxUI(
+        "prob_thresh": FloatUI(
             default=0.5,
             title="Probability threshold",
             description="Predicted object probability threshold",
@@ -32,7 +31,7 @@ from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
             max=1.0,
             step=0.01,
         ),
-        "nms_thresh": FloatSpinBoxUI(
+        "nms_thresh": FloatUI(
             default=0.4,
             title="Overlap threshold",
             description="Overlapping objects are considered the same when their area/surface overlap exceeds this threshold",
@@ -40,7 +39,7 @@ from imaging_server_kit import (DropDownUI, FloatSpinBoxUI, ImageUI,
             max=1.0,
             step=0.01,
         ),
-        "scale": FloatSpinBoxUI(
+        "scale": FloatUI(
             default=1.0,
             title="Scale",
             description="Scale the input image internally by this factor and rescale the output accordingly (<1 to downsample, >1 to upsample)",

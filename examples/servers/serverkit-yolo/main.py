@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import uvicorn
-from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI, DropDownUI
+from imaging_server_kit import algorithm_server, ImageUI, FloatUI, DropDownUI
 
 from ultralytics import YOLO
 
@@ -14,7 +14,7 @@ from ultralytics import YOLO
     used_for=["Bounding box detection"],
     parameters={
         "image": ImageUI(title="Image (2D, RGB)", description="Input image."),
-        "iou": FloatSpinBoxUI(
+        "iou": FloatUI(
             title="IoU",
             description="Intersection over union threshold.",
             min=0,
@@ -22,7 +22,7 @@ from ultralytics import YOLO
             step=0.1,
             default=0.5,
         ),
-        "conf": FloatSpinBoxUI(
+        "conf": FloatUI(
             title="Conf.",
             description="Confidence threshold for detection.",
             min=0.0,

@@ -39,17 +39,17 @@ The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0
 - The *second element* is a Python dictionary representing **metadata** associated with the output. It can be empty (`{}`). These metadata are used to affect how the output is displayed in client apps (e.g. Napari).
 - The *third element* is the output type: a string identifying what the output represents.
 
-| Output type       | Description                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `"image"`         | An image or image-like data (incl. 3D and RGB) as a numpy array.                                         |
-| `"mask"`          | A segmentation mask (2D, 3D) as integer numpy array. Integers represent the **object class**.            |
-| `"instance_mask"` | A segmentation mask (2D, 3D) as integer nD array. Integers represent **object instances**.            |
-| `"points"`        | A collection of point coordinates (array of shape (N, 2) or (N, 3)).                                  |
-| `"boxes"`         | A collection of boxes (array of shape (N, 4, 2) representing the box corners). |
-| `"vectors"`       | Array of vectors in the Napari [Vectors](https://napari.org/stable/howtos/layers/vectors.html) format.|
-| `"tracks"`        | Array of tracks in the Napari [Tracks](https://napari.org/stable/howtos/layers/tracks.html) format.   |
-| `"class"`         | A class label (for image classification).                                                             |
-| `"text"`          | A string of text (for example, for image captioning).                                                 |
+| Output type       | Description                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `"image"`         | An image or image-like data (incl. 3D and RGB) as a numpy array.                                       |
+| `"mask"`          | A segmentation mask (2D, 3D) as integer numpy array. Integers represent the **object class**.          |
+| `"instance_mask"` | A segmentation mask (2D, 3D) as integer nD array. Integers represent **object instances**.             |
+| `"points"`        | A collection of point coordinates (array of shape (N, 2) or (N, 3)).                                   |
+| `"boxes"`         | A collection of boxes (array of shape (N, 4, 2) representing the box corners).                         |
+| `"vectors"`       | Array of vectors in the Napari [Vectors](https://napari.org/stable/howtos/layers/vectors.html) format. |
+| `"tracks"`        | Array of tracks in the Napari [Tracks](https://napari.org/stable/howtos/layers/tracks.html) format.    |
+| `"class"`         | A class label (for image classification).                                                              |
+| `"text"`          | A string of text (for example, for image captioning).                                                  |
 
 The function can return multiple outputs, following the pattern:
 
@@ -78,13 +78,13 @@ This has several purposes:
 Below is our decorated threshold algorithm function:
 
 ```python
-from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
+from imaging_server_kit import algorithm_server, ImageUI, FloatUI
 
 @algorithm_server(
     algorithm_name="threshold",
     parameters={
         "image": ImageUI(),
-        "threshold": FloatSpinBoxUI(
+        "threshold": FloatUI(
             default=0.5,
             min=0.0,
             max=1.0,
@@ -109,21 +109,21 @@ Most importantly, we have specified the `parameters` field of `@algorithm_server
 
 The keys of the `parameters` dictionary should match the parameters of the Python function (in our example: `image` and `threshold`). The values are *parameter UI* elements. There is a UI element for each kind of parameters:
 
-| UI element           | Use case                                                                                                                         |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `ImageUI`            | Input image. Validates array dimensionality (by default, accepts `2D` and `3D` arrays).                                          |
-| `MaskUI`             | Segmentation mask. Validates array dimensionality (by default, accepts `2D` and `3D` arrays).                                    |
-| `DropDownUI`         | A dropdown selector. `items` is used to specify a list of available choices.                                                     |
-| `FloatSpinBoxUI`     | Numeric parameter (floating point). Validates `min` and `max` values. `step` can be used to specify a suitable incremental step. |
-| `IntSpinBoxUI`       | Numeric parameter (integer). Validates `min` and `max` values. `step` can be used to specify a suitable incremental step.        |
-| `BoolUI`             | Boolean parameter, represented as a checkbox.                                                                                    |
-| `StringUI`           | String parameter.                                                                                                                |
-| `PointsUI`           | Points parameter.                                                                                                                |
-| `VectorsUI`          | Vectors parameter.                                                                                                               |
-| `ShapesUI`           | Shapes parameter.                                                                                                                |
-| `TracksUI`           | Tracks parameter.                                                                                                                |
+| UI element   | Use case                                                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `ImageUI`    | Input image. Validates array dimensionality (by default, accepts `2D` and `3D` arrays).                                          |
+| `MaskUI`     | Segmentation mask. Validates array dimensionality (by default, accepts `2D` and `3D` arrays).                                    |
+| `DropDownUI` | A dropdown selector. `items` is used to specify a list of available choices.                                                     |
+| `FloatUI`    | Numeric parameter (floating point). Validates `min` and `max` values. `step` can be used to specify a suitable incremental step. |
+| `IntUI`      | Numeric parameter (integer). Validates `min` and `max` values. `step` can be used to specify a suitable incremental step.        |
+| `BoolUI`     | Boolean parameter, represented as a checkbox.                                                                                    |
+| `StringUI`   | String parameter.                                                                                                                |
+| `PointsUI`   | Points parameter.                                                                                                                |
+| `VectorsUI`  | Vectors parameter.                                                                                                               |
+| `ShapesUI`   | Shapes parameter.                                                                                                                |
+| `TracksUI`   | Tracks parameter.                                                                                                                |
 
-In our example, the input image array is well-represented by the `ImageUI` element, and the threshold parameter as a `FloatSpinBoxUI`. The parameter defaults and limits (min, max, step) are specified, as well as a title and description of the parameter, which will appear on the algorithm's `info` page.
+In our example, the input image array is well-represented by the `ImageUI` element, and the threshold parameter as a `FloatUI`. The parameter defaults and limits (min, max, step) are specified, as well as a title and description of the parameter, which will appear on the algorithm's `info` page.
 
 Moreover, the `@algorithm_server` decorator accepts a variety of optional parameters to enable downloading a sample image, linking to a project page, and providing information on the intended usage of the algorithm server. For details, take a look at the complete [demo example](https://github.com/Imaging-Server-Kit/imaging-server-kit/blob/main/src/imaging_server_kit/demo/threshold.py). The available fields include:
 

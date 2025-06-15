@@ -6,9 +6,9 @@ import matplotlib
 import uvicorn
 from imaging_server_kit import (
     DropDownUI,
-    FloatSpinBoxUI,
+    FloatUI,
     ImageUI,
-    IntSpinBoxUI,
+    IntUI,
     BoolUI,
     algorithm_server,
 )
@@ -24,7 +24,7 @@ from imaging_server_kit import (
             description="The orientation computation mode.",
             items=["fiber", "membrane"],
         ),
-        "scale": FloatSpinBoxUI(
+        "scale": FloatUI(
             default=1.0,
             title="Structural scale",
             description="The scale at which orientation is computed.",
@@ -37,7 +37,7 @@ from imaging_server_kit import (
             title="Output color-coded orientation",
             description="Whether to output a color-coded representation of orientation or not.",
         ),
-        "vector_spacing": IntSpinBoxUI(
+        "vector_spacing": IntUI(
             default=3,
             title="Vector spacing",
             description="The spacing at which the orientation vectors are rendered.",

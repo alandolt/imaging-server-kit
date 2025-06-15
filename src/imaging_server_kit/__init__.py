@@ -11,8 +11,8 @@ from .core import (
     AlgorithmServer,
     ParameterUI,
     DropDownUI,
-    FloatSpinBoxUI,
-    IntSpinBoxUI,
+    FloatUI,
+    IntUI,
     BoolUI,
     StringUI,
     ImageUI,
@@ -25,5 +25,6 @@ from .core import (
     deserialize_result_tuple,
     parse_params,
 )
+
 # from .auth import AuthenticatedAlgorithmServer
 from .hub import AlgorithmHub, MultiAlgorithmServer
