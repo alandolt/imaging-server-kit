@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import uvicorn
-from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI
+from imaging_server_kit import algorithm_server, ImageUI, FloatSpinBoxUI, DropDownUI
 
 from ultralytics import YOLO
 
@@ -30,6 +30,12 @@ from ultralytics import YOLO
             step=0.1,
             default=0.5,
         ),
+        "device": DropDownUI(
+            default="cpu",
+            title="Device",
+            description="Torch device for inference.",
+            items=["cpu", "cuda", "mps"],
+        ),
     },
     sample_images=[Path(__file__).parent / "sample_images" / "giraffs.png"],
 )
@@ -37,15 +43,20 @@ def yolo_detect_server(
     image: np.ndarray,
     iou: float,
     conf: float,
+    device: str,
 ):
     """Run a pretrained YOLO detector model."""
 
     model = YOLO("yolo11n.pt")
 
+    if image.shape[2] == 4:  # RGBA to RGB
+        image = image[..., :3]
+
     results = model(
         source=image,
         conf=conf,
         iou=iou,
+        device=device,
     )
 
     probabilities = results[0].boxes.conf.cpu().numpy()
