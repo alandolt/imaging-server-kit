@@ -40,7 +40,10 @@ def parse_algo_params_schema(algo_params_schema):
     algo_params = algo_params_schema.get("properties")
     required_params = algo_params_schema.get("required")
     for param in algo_params.keys():
-        algo_params[param]["required"] = param in required_params
+        if required_params is None:
+            algo_params[param]["required"] = False
+        else:
+            algo_params[param]["required"] = param in required_params
     return algo_params
 
 
