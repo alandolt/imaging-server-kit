@@ -48,3 +48,20 @@ pip install -e .
 ## License
 
 This software is distributed under the terms of the [BSD-3](http://opensource.org/licenses/BSD-3-Clause) license.
+
+## Citing
+
+If you use `imaging-server-kit` in the context of scientific publication, you can cite it as below.
+
+BibTeX:
+
+```
+@software{mallory_wittwer_2025_15673152,
+  author       = {Mallory Wittwer and Edward Andò and Maud Barthélemy and Florian Aymanns},
+  title        = {Imaging-Server-Kit/imaging-server-kit: v0.0.14},
+  url          = {https://doi.org/10.5281/zenodo.15673152},
+  doi          = {10.5281/zenodo.15673152},
+  version      = {v0.0.14},
+  year         = 2025,
+}
+```

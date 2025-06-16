@@ -3,6 +3,8 @@
 
 Deploy image processing algorithms in FastAPI servers and easily run them from Napari, QuPath, and more.
 
+[![DOI](https://zenodo.org/badge/912741131.svg)](https://doi.org/10.5281/zenodo.15673151)
+
 ## Installation
 
 Install the `imaging-server-kit` package with `pip`:
