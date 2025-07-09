@@ -38,8 +38,7 @@ def mask2features(segmentation_mask: np.ndarray) -> List[Feature]:
                 )
                 features.append(feature)
             except ValueError:
-                # TODO: not sure what to do when this happens (very occasionally)
-                print("Found an invalid polygon...")
+                print("Invalid polygon geometry.")
 
     return features
 
@@ -90,8 +89,7 @@ def instance_mask2features(segmentation_mask: np.ndarray) -> List[Feature]:
                 )
                 features.append(feature)
             except ValueError:
-                # TODO: not sure what to do when this happens (very occasionally)
-                print("Found an invalid polygon...")
+                print("Invalid polygon geometry.")
 
     return features
 
@@ -175,15 +173,12 @@ def boxes2features(boxes: np.ndarray) -> List[Feature]:
     for i, box in enumerate(boxes):
         coords = np.array(box)[:, ::-1]  # Invert XY
         coords = coords.tolist()
-        coords.append(
-            coords[0]
-        )  # Add the first element at the end to close the Polygon
+        coords.append(coords[0])  # Close the Polygon
         try:
             geom = Polygon(coordinates=[coords], validate=True)
+            features.append(Feature(geometry=geom, properties={"Detection ID": i}))
         except ValueError:
-            print("Invalid box polygon found. Expected an array of shape (N, 4, D) representing the corners of the box.")
-            geom = None  # TODO: should we handle this better?
-        features.append(Feature(geometry=geom, properties={"Detection ID": i}))
+            print("Invalid box polygon geometry. Expected an array of shape (N, 4, D) representing the corners of the box.")
     return features
 
 
@@ -211,8 +206,11 @@ def points2features(points: np.ndarray) -> List[Feature]:
     features = []
     point_coords = np.array(points)[:, ::-1]  # Invert XY
     for i, point in enumerate(point_coords):
-        geom = Point(coordinates=[np.array(point).tolist()])
-        features.append(Feature(geometry=geom, properties={"Detection ID": i}))
+        try:
+            geom = Point(coordinates=[np.array(point).tolist()])
+            features.append(Feature(geometry=geom, properties={"Detection ID": i}))
+        except:
+            print("Invalid point geometry.")
     return features
 
 
@@ -242,8 +240,12 @@ def vectors2features(vectors: np.ndarray) -> List[Feature]:
         point_start = list(vector[0])
         point_end = list(vector[0] + vector[1])
         coords = [point_start, point_end]
-        geom = LineString(coordinates=coords)
-        features.append(Feature(geometry=geom, properties={"Detection ID": i}))
+        try:
+            geom = LineString(coordinates=coords)
+            features.append(Feature(geometry=geom, properties={"Detection ID": i}))
+        except ValueError:
+            print("Invalid line string geometry.")
+
     return features
 
 
@@ -255,6 +257,5 @@ def features2vectors(features):
     displacements = vectors_arr[:, 1] - origins
     vectors = np.stack((origins, displacements))
     vectors = np.rollaxis(vectors, 1)
-    print(f"{vectors.shape=}")
     vectors = vectors[:, :, ::-1]  # Invert XY
     return vectors
