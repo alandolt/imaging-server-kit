@@ -106,6 +106,8 @@ def serialize_result_tuple(result_data_tuple: List[Tuple]) -> List[Dict]:
             features = data  # A simple string
         elif data_type == "text":
             features = data  # A text string
+        elif data_type == "notification":
+            features = data
         else:
             print(f"Unknown data_type: {data_type}")
             features = None
@@ -155,6 +157,8 @@ def deserialize_result_tuple(serialized_results: List[Dict]) -> List[Tuple]:
             data = features  # A simple string
         elif data_type == "text":
             data = features  # A text string
+        elif data_type == "notification":
+            data = features
         else:
             print(f"Unknown data_type: {data_type}")
 

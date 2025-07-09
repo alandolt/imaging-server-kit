@@ -50,6 +50,7 @@ The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0
 | `"tracks"`        | Array of tracks in the Napari [Tracks](https://napari.org/stable/howtos/layers/tracks.html) format.    |
 | `"class"`         | A class label (for image classification).                                                              |
 | `"text"`          | A string of text (for example, for image captioning).                                                  |
+| `"notification"`  | A notification message (with levels `info`, `warning`, or `error`).                                    |
 
 The function can return multiple outputs, following the pattern:
 

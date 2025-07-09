@@ -132,7 +132,7 @@ def skimage_log_server(
             (points, points_params, "points"),
         ]
     else:
-        return [("No points were detected.", {}, "text")]
+        return [("No points were detected.", {"level": "info"}, "notification")]
 
 
 if __name__ == "__main__":

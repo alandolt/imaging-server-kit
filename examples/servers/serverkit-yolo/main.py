@@ -61,7 +61,7 @@ def yolo_detect_server(
 
     probabilities = results[0].boxes.conf.cpu().numpy()
     if len(probabilities) == 0:
-        return [("Nothing was detected", {}, "text")]
+        return [("Nothing was detected", {"level": "info"}, "notification")]
 
     box_results = results[0].boxes.xyxy.cpu().numpy().reshape((-1, 2, 2))
     classes_indeces = results[0].boxes.cls.cpu().numpy()
