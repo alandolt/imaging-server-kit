@@ -51,6 +51,8 @@ The data tuples are inspired from Napari's [LayerDataTuple](https://napari.org/0
 | `"class"`         | A class label (for image classification).                                                              |
 | `"text"`          | A string of text (for example, for image captioning).                                                  |
 | `"notification"`  | A notification message (with levels `info`, `warning`, or `error`).                                    |
+| `"scalar"`        | A scalar value (e.g. `42`, `3.14`).                                                                    |
+| `"list"`          | A list of numeric and/or string values (e.g. `[42, 3.14, "cat"]`).                                     |
 
 The function can return multiple outputs, following the pattern:
 
